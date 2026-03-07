@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-03-07T20:33:24.006759",
+  "cycle": 4,
+  "channels_monitored": 6,
+  "monitored_channels_list": [
+    "durov",
+    "telegram",
+    "tginfo",
+    "technews",
+    "cryptoupdates",
+    "@Crypto_Malik_Toss_Session"
+  ],
+  "total_messages_scanned": 188,
+  "total_alerts_found": 0,
+  "min_confidence_threshold": 50,
+  "rate_limit_hits": 0,
+  "last_scan_time": "2026-03-07T20:33:24.006759",
+  "agent_status": "running",
+  "channel_stats": [
+    {
+      "name": "tginfo",
+      "messages": 1495,
+      "alerts": 28,
+      "last_scanned": "2026-03-07 14:59:05"
+    },
+    {
+      "name": "telegram",
+      "messages": 1625,
+      "alerts": 0,
+      "last_scanned": "2026-03-07 14:58:59"
+    },
+    {
+      "name": "durov",
+      "messages": 1560,
+      "alerts": 10,
+      "last_scanned": "2026-03-07 14:58:53"
+    },
+    {
+      "name": "@Crypto_Malik_Toss_Session",
+      "messages": 900,
+      "alerts": 0,
+      "last_scanned": "2026-03-07 14:57:50"
+    },
+    {
+      "name": "cryptoupdates",
+      "messages": 1159,
+      "alerts": 36,
+      "last_scanned": "2026-03-07 14:57:46"
+    },
+    {
+      "name": "technews",
+      "messages": 0,
+      "alerts": 0,
+      "last_scanned": null
+    }
+  ]
+}

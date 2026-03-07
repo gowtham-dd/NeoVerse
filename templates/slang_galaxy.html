@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus AI - Slang Galaxy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #0f172a;
+            --darker: #020617;
+            --light: #f8fafc;
+            --gray: #64748b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            color: var(--light);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Dashboard Layout - EXACTLY LIKE DASHBOARD */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Sidebar - EXACTLY LIKE DASHBOARD */
+        .sidebar {
+            background: rgba(15, 23, 42, 0.95);
+            border-right: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 2rem 1rem;
+            overflow-y: auto;
+            height: 100vh;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--darker);
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--darker);
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 2rem;
+            padding-left: 1rem;
+        }
+        
+        .logo i {
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+        
+        .logo span {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-menu li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0.8rem 1rem;
+            color: var(--gray);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--light);
+        }
+        
+        .nav-menu a.active {
+            border-left: 3px solid var(--primary);
+        }
+        
+        /* New Slang Button - Same as dashboard */
+        .nav-menu a.slang-btn {
+            background: transparent;
+            border: none;
+            margin-top: 1rem;
+        }
+        
+        .nav-menu a.slang-btn:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .nav-menu a.slang-btn i {
+            color: var(--gray);
+        }
+        
+        .nav-menu a.slang-btn:hover i {
+            color: var(--light);
+        }
+        
+        .nav-menu a.slang-btn.active {
+            background: rgba(99, 102, 241, 0.1);
+            border-left: 3px solid var(--primary);
+        }
+        
+        .nav-menu a.slang-btn.active i {
+            color: var(--light);
+        }
+        
+        /* Alert button with badge - Same as dashboard */
+        .nav-menu a.alert-btn {
+            position: relative;
+        }
+        
+        .alert-badge-nav {
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            margin-left: auto;
+            min-width: 24px;
+            text-align: center;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+        
+        .agent-status {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0.8rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        .status-active {
+            background: var(--secondary);
+            animation: pulse 2s infinite;
+        }
+        
+        .status-inactive {
+            background: var(--gray);
+        }
+        
+        /* Agent Log in Sidebar */
+        .agent-log {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 2rem;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .log-entry {
+            padding: 0.3rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .log-time {
+            color: var(--secondary);
+            min-width: 60px;
+            font-size: 0.75rem;
+        }
+
+        .log-info {
+            color: #93c5fd;
+        }
+        
+        /* Main Content */
+        .main-content {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Galaxy Canvas */
+        #galaxy-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        /* Overlay UI */
+        .galaxy-overlay {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            right: 2rem;
+            z-index: 2;
+            pointer-events: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .galaxy-header {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            pointer-events: auto;
+            max-width: 400px;
+        }
+        
+        .galaxy-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #fff, var(--warning));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .galaxy-header p {
+            color: var(--gray);
+            margin-bottom: 1rem;
+        }
+        
+        .galaxy-stats {
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        .galaxy-stat {
+            text-align: center;
+        }
+        
+        .galaxy-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--warning);
+        }
+        
+        .galaxy-stat-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+        
+        /* Legend */
+        .galaxy-legend {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            pointer-events: auto;
+            display: flex;
+            gap: 2rem;
+            margin-left: 2rem;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px currentColor;
+        }
+        
+        .legend-color.established {
+            background: var(--primary);
+            color: var(--primary);
+        }
+        
+        .legend-color.emerging {
+            background: var(--warning);
+            color: var(--warning);
+        }
+        
+        .legend-color.new {
+            background: var(--secondary);
+            color: var(--secondary);
+        }
+        
+        /* Cluster Info Panel */
+        .cluster-info {
+            position: absolute;
+            top: 50%;
+            right: 2rem;
+            transform: translateY(-50%);
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            pointer-events: auto;
+            max-width: 400px;
+            width: 100%;
+            display: none;
+            z-index: 3;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: slideInRight 0.3s ease-out;
+        }
+        
+        .cluster-info.active {
+            display: block;
+        }
+        
+        .cluster-info h2 {
+            margin-bottom: 0.5rem;
+            color: var(--warning);
+            font-size: 1.5rem;
+        }
+        
+        .cluster-type-badge {
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .badge-established {
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            border: 1px solid var(--primary);
+        }
+        
+        .badge-emerging {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fcd34d;
+            border: 1px solid var(--warning);
+        }
+        
+        .badge-new {
+            background: rgba(16, 185, 129, 0.2);
+            color: #a7f3d0;
+            border: 1px solid var(--secondary);
+        }
+        
+        .cluster-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        
+        .cluster-stat-item {
+            text-align: center;
+        }
+        
+        .cluster-stat-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+        
+        .cluster-stat-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--light);
+        }
+        
+        .cluster-keywords {
+            margin: 1rem 0;
+        }
+        
+        .keyword-tag {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin: 0.2rem;
+            color: var(--primary);
+        }
+        
+        .cluster-messages {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 1rem 0;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+        
+        .cluster-message {
+            padding: 0.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .cluster-message:last-child {
+            border-bottom: none;
+        }
+        
+        .message-source {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            background: rgba(99, 102, 241, 0.2);
+            border-radius: 4px;
+            color: var(--gray);
+        }
+        
+        .cluster-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-family: 'Poppins', sans-serif;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-confirm {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-confirm:hover {
+            background: #0d9488;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-deny {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-deny:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-view {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-view:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .close-btn:hover {
+            color: var(--danger);
+            transform: scale(1.1);
+        }
+        
+        /* Zoom Controls */
+        .zoom-controls {
+            position: absolute;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            pointer-events: auto;
+        }
+        
+        .zoom-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: var(--light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .zoom-btn:hover {
+            background: var(--primary);
+            transform: scale(1.1);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translate(100%, -50%);
+                opacity: 0;
+            }
+            to {
+                transform: translate(0, -50%);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Floating Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: var(--secondary);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 10000;
+            animation: slideIn 0.3s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .back-btn {
+            margin-bottom: 2rem;
+        }
+        
+        .back-btn a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .back-btn a:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar - EXACTLY LIKE DASHBOARD with WORKING LINKS -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-brain-circuit"></i>
+                <span>NexusAI</span>
+            </div>
+            
+            <ul class="nav-menu">
+                <li><a href="/dashboard">
+                    <i class="fas fa-dashboard"></i> Dashboard
+                </a></li>
+                <li><a href="/">
+                    <i class="fas fa-home"></i> Home
+                </a></li>
+                <li><a href="#" onclick="showComingSoon('Agents'); return false;">
+                    <i class="fas fa-robot"></i> Agents
+                </a></li>
+                <li><a href="/slang_galaxy" class="active">
+                    <i class="fas fa-ring"></i> New Slang Galaxy
+                </a></li>
+                <li><a href="/alerts" class="alert-btn">
+                    <i class="fas fa-bell"></i> Alerts
+                    <span class="alert-badge-nav" id="navAlertBadge">0</span>
+                </a></li>
+                <li><a href="#" onclick="showComingSoon('Settings'); return false;">
+                    <i class="fas fa-cog"></i> Settings
+                </a></li>
+            </ul>
+            
+            <div class="agent-status">
+                <h3>Agent Status</h3>
+                <div class="status-item" id="telegram-status">
+                    <div class="status-indicator status-inactive"></div>
+                    <span>Telegram Agent</span>
+                </div>
+                <div class="status-item" id="Telegram-status">
+                    <div class="status-indicator status-inactive"></div>
+                    <span>Telegram Agent</span>
+                </div>
+                <div class="status-item" id="reddit-status">
+                    <div class="status-indicator status-inactive"></div>
+                    <span>Reddit Agent</span>
+                </div>
+            </div>
+            
+            <div class="agent-log" id="agentLog">
+                <div class="log-entry"><span class="log-time">[00:00:00]</span> <span class="log-info">System started</span></div>
+            </div>
+        </aside>
+
+        <!-- Main Content with Galaxy -->
+        <main class="main-content">
+            <canvas id="galaxy-canvas"></canvas>
+            
+            <!-- Overlay UI -->
+            <div class="galaxy-overlay">
+                <div class="galaxy-header">
+                    <h1>🌌 Slang Galaxy</h1>
+                    <p>Click on any cluster to view drug trafficking codewords</p>
+                    <div class="galaxy-stats">
+                        <div class="galaxy-stat">
+                            <div class="galaxy-stat-value" id="established-clusters">0</div>
+                            <div class="galaxy-stat-label">Established</div>
+                        </div>
+                        <div class="galaxy-stat">
+                            <div class="galaxy-stat-value" id="emerging-clusters">0</div>
+                            <div class="galaxy-stat-label">Emerging</div>
+                        </div>
+                        <div class="galaxy-stat">
+                            <div class="galaxy-stat-value" id="new-detections">0</div>
+                            <div class="galaxy-stat-label">New</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Legend -->
+                <div class="galaxy-legend">
+                    <div class="legend-item">
+                        <div class="legend-color established"></div>
+                        <span>Established Slang</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color emerging"></div>
+                        <span>Emerging Patterns</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color new"></div>
+                        <span>New Detections</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cluster Info Panel -->
+            <div class="cluster-info" id="cluster-info">
+                <button class="close-btn" onclick="closeClusterInfo()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h2 id="cluster-name">Cocaine Network</h2>
+                <span class="cluster-type-badge" id="cluster-badge">Established</span>
+                
+                <div class="cluster-stats">
+                    <div class="cluster-stat-item">
+                        <div class="cluster-stat-label">Messages</div>
+                        <div class="cluster-stat-value" id="cluster-size">45</div>
+                    </div>
+                    <div class="cluster-stat-item">
+                        <div class="cluster-stat-label">Confidence</div>
+                        <div class="cluster-stat-value" id="cluster-confidence">95%</div>
+                    </div>
+                    <div class="cluster-stat-item">
+                        <div class="cluster-stat-label">First Seen</div>
+                        <div class="cluster-stat-value" id="cluster-first">2024-01-15</div>
+                    </div>
+                    <div class="cluster-stat-item">
+                        <div class="cluster-stat-label">Last Active</div>
+                        <div class="cluster-stat-value" id="cluster-last">2024-03-10</div>
+                    </div>
+                </div>
+                
+                <div class="cluster-keywords" id="cluster-keywords">
+                    <span class="keyword-tag">#coke</span>
+                    <span class="keyword-tag">#snow</span>
+                    <span class="keyword-tag">#powder</span>
+                </div>
+                
+                <h4 style="margin-bottom: 0.5rem;">Sample Messages</h4>
+                <div class="cluster-messages" id="cluster-messages">
+                    <!-- Messages will be populated here -->
+                </div>
+                
+                <div class="cluster-actions" id="cluster-actions">
+                    <button class="btn btn-confirm" onclick="confirmSlang()">
+                        <i class="fas fa-check"></i> Confirm
+                    </button>
+                    <button class="btn btn-deny" onclick="denySlang()">
+                        <i class="fas fa-times"></i> Deny
+                    </button>
+                    <button class="btn btn-view" onclick="zoomToCluster()">
+                        <i class="fas fa-search-plus"></i> Zoom
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Zoom Controls -->
+            <div class="zoom-controls">
+                <button class="zoom-btn" onclick="zoomIn()">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="zoom-btn" onclick="zoomOut()">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button class="zoom-btn" onclick="resetView()">
+                    <i class="fas fa-home"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ==============================================
+        // NAVIGATION FUNCTIONS (SAME AS DASHBOARD)
+        // ==============================================
+        
+        function showComingSoon(feature) {
+            showNotification(`${feature} feature coming soon!`, 'info');
+        }
+        
+        // Update navigation alert badge
+        function updateNavAlertBadge() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('navAlertBadge');
+                    if (badge) {
+                        badge.textContent = data.total_alerts || 0;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching alert count:', error);
+                    document.getElementById('navAlertBadge').textContent = '156';
+                });
+        }
+        
+        // ==============================================
+        // Three.js Galaxy Visualization (Your existing code)
+        // ==============================================
+        let scene, camera, renderer;
+        let clusters = [];
+        let currentClusterId = null;
+        let cameraDistance = 20;
+        let targetPosition = { x: 0, y: 0, z: 20 };
+        let currentPosition = { x: 0, y: 0, z: 20 };
+        
+        // Rotation control variables
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let rotationSpeed = 0.005;
+        let autoRotate = true;
+        let autoRotateSpeed = 0.002;
+        let rotationX = 0;
+        let rotationY = 0;
+        let targetRotationX = 0;
+        let targetRotationY = 0;
+        
+        // Drug trafficking codewords data
+        const drugCodewords = {
+            cocaine: {
+                names: ['Cocaine Network', 'Snow Routes', 'Powder Distribution', 'White Lines', 'Blow Supply'],
+                keywords: ['#white', '#snow', '#powder', '#coke', '#lines', '#blow', '#nose', '#ski', '#yayo'],
+                messages: [
+                    { text: 'Need fresh white for weekend party', source: 'Telegram' },
+                    { text: 'snow delivery available tonight', source: 'Telegram' },
+                    { text: 'pure powder 5g ready', source: 'Reddit' },
+                    { text: 'ski trip supplies in stock', source: 'Telegram' },
+                    { text: 'yayo special this week', source: 'Telegram' }
+                ]
+            },
+            heroin: {
+                names: ['Horse Network', 'Brown Sugar Route', 'China White', 'Smack Circle', 'Dope Supply'],
+                keywords: ['#horse', '#brown', '#smack', '#dope', '#china', '#H', '#boy', '#junk'],
+                messages: [
+                    { text: 'horse tranquilizer available', source: 'Telegram' },
+                    { text: 'brown sugar fresh batch', source: 'Reddit' },
+                    { text: 'china white special delivery', source: 'Telegram' },
+                    { text: 'smack city tonight', source: 'Telegram' }
+                ]
+            },
+            meth: {
+                names: ['Crystal Network', 'Ice Routes', 'Glass Supply', 'Tina Circle', 'Crank Crew'],
+                keywords: ['#crystal', '#ice', '#glass', '#tina', '#crank', '#speed', '#shards', '#cook'],
+                messages: [
+                    { text: 'crystal clear available', source: 'Telegram' },
+                    { text: 'ice cold delivery', source: 'Reddit' },
+                    { text: 'glass shards ready', source: 'Telegram' },
+                    { text: 'tina needs new friends', source: 'Telegram' }
+                ]
+            },
+            mdma: {
+                names: ['Molly Network', 'Ecstasy Empire', 'XTC Circle', 'Roll Crew', 'Love Drug'],
+                keywords: ['#molly', '#ecstasy', '#xtc', '#roll', '#mdma', '#beans', '#thizz', '#love'],
+                messages: [
+                    { text: 'molly pure love available', source: 'Telegram' },
+                    { text: 'ecstasy pills green apples', source: 'Reddit' },
+                    { text: 'xtc rolling tonight', source: 'Telegram' },
+                    { text: 'love drug special', source: 'Telegram' }
+                ]
+            },
+            ketamine: {
+                names: ['K Network', 'Special K', 'Vitamin K', 'Ketty Crew', 'Horse Meds'],
+                keywords: ['#ketamine', '#specialK', '#vitaminK', '#ketty', '#horse', '#k'],
+                messages: [
+                    { text: 'special K injection', source: 'Telegram' },
+                    { text: 'vitamin K supplement', source: 'Reddit' },
+                    { text: 'horse medicine available', source: 'Telegram' }
+                ]
+            },
+            fentanyl: {
+                names: ['Fent Network', 'Dance Fever', 'China Girl', 'Drop Dead', 'Apache'],
+                keywords: ['#fent', '#dance', '#china', '#apache', '#drop', '#fentanyl'],
+                messages: [
+                    { text: 'dance fever going around', source: 'Telegram' },
+                    { text: 'china girl special blend', source: 'Reddit' },
+                    { text: 'apache warrior supplies', source: 'Telegram' }
+                ]
+            },
+            weed: {
+                names: ['Green Network', 'Bud Route', 'Grass Supply', 'Weed Circle', 'Cannabis Crew'],
+                keywords: ['#green', '#bud', '#grass', '#weed', '#cannabis', '#pot', '#maryjane'],
+                messages: [
+                    { text: 'green stuff available', source: 'Telegram' },
+                    { text: 'bud light special', source: 'Reddit' },
+                    { text: 'grass delivery campus', source: 'Telegram' }
+                ]
+            },
+            xanax: {
+                names: ['Xan Network', 'Bar Route', 'School Bus', 'Benzos Crew', 'Sticks'],
+                keywords: ['#xan', '#bars', '#benzos', '#schoolbus', '#sticks', '#xanax'],
+                messages: [
+                    { text: 'school bus arriving', source: 'Telegram' },
+                    { text: 'bars available 2mg', source: 'Reddit' },
+                    { text: 'stick supply restocked', source: 'Telegram' }
+                ]
+            }
+        };
+        
+        // Generate cluster data
+        function generateClusterData() {
+            const clusters = [];
+            const drugKeys = Object.keys(drugCodewords);
+            
+            for (let i = 0; i < 24; i++) {
+                const drugType = drugKeys[Math.floor(Math.random() * drugKeys.length)];
+                const drugData = drugCodewords[drugType];
+                
+                let type;
+                if (i < 12) type = 'established';
+                else if (i < 18) type = 'emerging';
+                else type = 'new';
+                
+                clusters.push({
+                    id: i + 1,
+                    name: drugData.names[Math.floor(Math.random() * drugData.names.length)],
+                    type: type,
+                    size: type === 'established' ? 30 + Math.floor(Math.random() * 30) :
+                           type === 'emerging' ? 15 + Math.floor(Math.random() * 15) :
+                           5 + Math.floor(Math.random() * 10),
+                    keywords: drugData.keywords,
+                    messages: drugData.messages,
+                    confidence: type === 'established' ? 0.85 + Math.random() * 0.1 :
+                                type === 'emerging' ? 0.65 + Math.random() * 0.15 :
+                                0.45 + Math.random() * 0.2,
+                    firstSeen: type === 'established' ? '2024-01-' + (10 + Math.floor(Math.random() * 10)) :
+                                type === 'emerging' ? '2024-02-' + (1 + Math.floor(Math.random() * 20)) :
+                                '2024-03-' + (1 + Math.floor(Math.random() * 10)),
+                    drugType: drugType
+                });
+            }
+            
+            return clusters;
+        }
+        
+        const clusterData = generateClusterData();
+        
+        // Initialize Three.js
+        function initGalaxy() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x050510);
+            
+            camera = new THREE.PerspectiveCamera(75, (window.innerWidth - 250) / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 5, 20);
+            
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxy-canvas'), antialias: true });
+            renderer.setSize(window.innerWidth - 250, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            
+            // Mouse drag rotation
+            document.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMousePosition = {
+                    x: e.clientX,
+                    y: e.clientY
+                };
+                autoRotate = false;
+            });
+            
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+                setTimeout(() => {
+                    if (!isDragging) autoRotate = true;
+                }, 3000);
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    const deltaX = e.clientX - previousMousePosition.x;
+                    const deltaY = e.clientY - previousMousePosition.y;
+                    
+                    targetRotationY += deltaX * rotationSpeed;
+                    targetRotationX += deltaY * rotationSpeed;
+                    
+                    targetRotationX = Math.max(-Math.PI/2, Math.min(Math.PI/2, targetRotationX));
+                    
+                    previousMousePosition = {
+                        x: e.clientX,
+                        y: e.clientY
+                    };
+                }
+            });
+            
+            // Click detection
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+            
+            document.addEventListener('click', (event) => {
+                const rect = renderer.domElement.getBoundingClientRect();
+                mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                
+                raycaster.setFromCamera(mouse, camera);
+                
+                const intersects = raycaster.intersectObjects(clusters.map(c => c.mesh));
+                
+                if (intersects.length > 0) {
+                    const hit = intersects[0].object;
+                    showClusterInfo(hit.userData);
+                }
+            });
+            
+            // Ambient light
+            const ambientLight = new THREE.AmbientLight(0x404060);
+            scene.add(ambientLight);
+            
+            // Directional light
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+            dirLight.position.set(1, 1, 1);
+            scene.add(dirLight);
+            
+            // Add stars background
+            addStars();
+            
+            // Create galaxy clusters
+            createGalaxyClusters(clusterData);
+            
+            // Update stats
+            updateStats(clusterData);
+            
+            // Animation
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                if (autoRotate && !isDragging) {
+                    targetRotationY += autoRotateSpeed;
+                }
+                
+                rotationX += (targetRotationX - rotationX) * 0.05;
+                rotationY += (targetRotationY - rotationY) * 0.05;
+                
+                currentPosition.x += (targetPosition.x - currentPosition.x) * 0.05;
+                currentPosition.y += (targetPosition.y - currentPosition.y) * 0.05;
+                currentPosition.z += (targetPosition.z - currentPosition.z) * 0.05;
+                
+                const radius = currentPosition.z;
+                camera.position.x = radius * Math.sin(rotationY) * Math.cos(rotationX);
+                camera.position.y = radius * Math.sin(rotationX);
+                camera.position.z = radius * Math.cos(rotationY) * Math.cos(rotationX);
+                
+                camera.lookAt(0, 0, 0);
+                
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+        }
+        
+        function addStars() {
+            const starsGeometry = new THREE.BufferGeometry();
+            const starsCount = 3000;
+            const starsPositions = new Float32Array(starsCount * 3);
+            const starsColors = new Float32Array(starsCount * 3);
+            
+            for (let i = 0; i < starsCount * 3; i += 3) {
+                const r = 50 + Math.random() * 50;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                
+                starsPositions[i] = r * Math.sin(phi) * Math.cos(theta);
+                starsPositions[i + 1] = r * Math.sin(phi) * Math.sin(theta);
+                starsPositions[i + 2] = r * Math.cos(phi);
+                
+                starsColors[i] = 0.5 + Math.random() * 0.5;
+                starsColors[i + 1] = 0.5 + Math.random() * 0.5;
+                starsColors[i + 2] = 1.0;
+            }
+            
+            starsGeometry.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
+            starsGeometry.setAttribute('color', new THREE.BufferAttribute(starsColors, 3));
+            
+            const starsMaterial = new THREE.PointsMaterial({ 
+                size: 0.3,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            const starsMesh = new THREE.Points(starsGeometry, starsMaterial);
+            scene.add(starsMesh);
+            
+            scene.fog = new THREE.FogExp2(0x050510, 0.0015);
+        }
+        
+        function createGalaxyClusters(clusterData) {
+            clusterData.forEach((data, index) => {
+                const phi = Math.acos(2 * (index / clusterData.length) - 1);
+                const theta = Math.PI * (1 + Math.sqrt(5)) * index;
+                
+                const radius = 8;
+                const x = radius * Math.sin(phi) * Math.cos(theta);
+                const y = radius * Math.sin(phi) * Math.sin(theta) * 0.6;
+                const z = radius * Math.cos(phi);
+                
+                let color;
+                switch(data.type) {
+                    case 'established':
+                        color = new THREE.Color(0x6366f1);
+                        break;
+                    case 'emerging':
+                        color = new THREE.Color(0xf59e0b);
+                        break;
+                    case 'new':
+                        color = new THREE.Color(0x10b981);
+                        break;
+                    default:
+                        color = new THREE.Color(0x6366f1);
+                }
+                
+                const size = data.type === 'established' ? 0.8 + (data.size / 100) :
+                            data.type === 'emerging' ? 0.6 + (data.size / 100) :
+                            0.4 + (data.size / 100);
+                
+                createCluster(x, y, z, size, color, data);
+            });
+        }
+        
+        function createCluster(x, y, z, size, color, data) {
+            const geometry = new THREE.SphereGeometry(size, 32, 32);
+            const material = new THREE.MeshPhongMaterial({
+                color: color,
+                emissive: color.clone().multiplyScalar(0.3),
+                shininess: 30,
+                transparent: true,
+                opacity: 0.9
+            });
+            
+            const sphere = new THREE.Mesh(geometry, material);
+            sphere.position.set(x, y, z);
+            sphere.userData = data;
+            scene.add(sphere);
+            
+            const glowGeometry = new THREE.SphereGeometry(size * 1.8, 16, 16);
+            const glowMaterial = new THREE.MeshBasicMaterial({
+                color: color,
+                transparent: true,
+                opacity: 0.15
+            });
+            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+            glow.position.set(x, y, z);
+            scene.add(glow);
+            
+            if (data.type === 'new') {
+                const particles = [];
+                for (let i = 0; i < 12; i++) {
+                    const particleGeo = new THREE.SphereGeometry(0.08, 6, 6);
+                    const particleMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                    const particle = new THREE.Mesh(particleGeo, particleMat);
+                    
+                    const angle = (i / 12) * Math.PI * 2;
+                    particle.position.set(
+                        x + Math.cos(angle) * size * 2.5,
+                        y + Math.sin(angle) * size * 0.8,
+                        z + Math.sin(angle) * size * 0.8
+                    );
+                    
+                    scene.add(particle);
+                    particles.push(particle);
+                }
+                
+                function animateParticles() {
+                    if (!sphere.parent) return;
+                    
+                    particles.forEach((particle, i) => {
+                        const time = Date.now() * 0.002;
+                        const angle = (i / 12) * Math.PI * 2 + time;
+                        particle.position.x = x + Math.cos(angle) * size * 2.5;
+                        particle.position.y = y + Math.sin(angle) * size * 0.8;
+                        particle.position.z = z + Math.sin(angle) * size * 0.8;
+                    });
+                    
+                    requestAnimationFrame(animateParticles);
+                }
+                
+                animateParticles();
+            }
+            
+            clusters.push({
+                mesh: sphere,
+                data: data
+            });
+        }
+        
+        function showClusterInfo(data) {
+            const infoPanel = document.getElementById('cluster-info');
+            
+            currentClusterId = data.id;
+            
+            document.getElementById('cluster-name').textContent = data.name;
+            
+            const badge = document.getElementById('cluster-badge');
+            badge.textContent = data.type === 'new' ? '⚠️ NEW DETECTION' :
+                               data.type === 'emerging' ? '🌙 EMERGING PATTERN' :
+                               '⭐ ESTABLISHED CLUSTER';
+            badge.className = 'cluster-type-badge ' + 
+                (data.type === 'new' ? 'badge-new' :
+                 data.type === 'emerging' ? 'badge-emerging' :
+                 'badge-established');
+            
+            document.getElementById('cluster-size').textContent = data.size;
+            document.getElementById('cluster-confidence').textContent = Math.round(data.confidence * 100) + '%';
+            document.getElementById('cluster-first').textContent = data.firstSeen;
+            
+            const lastActive = new Date();
+            lastActive.setDate(lastActive.getDate() - Math.floor(Math.random() * 5));
+            document.getElementById('cluster-last').textContent = lastActive.toISOString().split('T')[0];
+            
+            const keywordsDiv = document.getElementById('cluster-keywords');
+            keywordsDiv.innerHTML = '';
+            data.keywords.forEach(keyword => {
+                const span = document.createElement('span');
+                span.className = 'keyword-tag';
+                span.textContent = keyword;
+                keywordsDiv.appendChild(span);
+            });
+            
+            const messagesDiv = document.getElementById('cluster-messages');
+            messagesDiv.innerHTML = '';
+            data.messages.slice(0, 5).forEach(msg => {
+                const div = document.createElement('div');
+                div.className = 'cluster-message';
+                div.innerHTML = `
+                    <span>${msg.text}</span>
+                    <span class="message-source">${msg.source}</span>
+                `;
+                messagesDiv.appendChild(div);
+            });
+            
+            const actionsDiv = document.getElementById('cluster-actions');
+            actionsDiv.style.display = data.type === 'new' ? 'flex' : 'none';
+            
+            infoPanel.classList.add('active');
+            highlightCluster(data.id);
+        }
+        
+        function highlightCluster(clusterId) {
+            clusters.forEach(cluster => {
+                if (cluster.data.id === clusterId) {
+                    cluster.mesh.scale.set(1.3, 1.3, 1.3);
+                    const time = Date.now() * 0.005;
+                    cluster.mesh.material.emissive.setHSL(0.6, 1, 0.3 + Math.sin(time) * 0.1);
+                } else {
+                    cluster.mesh.scale.set(1, 1, 1);
+                    cluster.mesh.material.emissive.setHSL(0, 0, 0);
+                }
+            });
+        }
+        
+        function closeClusterInfo() {
+            document.getElementById('cluster-info').classList.remove('active');
+            clusters.forEach(cluster => {
+                cluster.mesh.scale.set(1, 1, 1);
+                cluster.mesh.material.emissive.setHSL(0, 0, 0);
+            });
+        }
+        
+        function zoomToCluster() {
+            if (!currentClusterId) return;
+            const cluster = clusters.find(c => c.data.id === currentClusterId);
+            if (cluster) {
+                const pos = cluster.mesh.position;
+                targetPosition.x = pos.length() * 0.5;
+                targetPosition.y = pos.y * 0.5;
+                targetPosition.z = pos.length() * 0.5;
+            }
+        }
+        
+        function zoomIn() {
+            targetPosition.z -= 2;
+            if (targetPosition.z < 5) targetPosition.z = 5;
+        }
+        
+        function zoomOut() {
+            targetPosition.z += 2;
+            if (targetPosition.z > 30) targetPosition.z = 30;
+        }
+        
+        function resetView() {
+            targetPosition = { x: 0, y: 0, z: 20 };
+            targetRotationX = 0;
+            targetRotationY = 0;
+            autoRotate = true;
+        }
+        
+        function confirmSlang() {
+            if (!currentClusterId) return;
+            showNotification('New slang pattern confirmed! Added to established clusters.', 'success');
+            document.getElementById('cluster-info').classList.remove('active');
+            
+            const newDetections = document.getElementById('new-detections');
+            const established = document.getElementById('established-clusters');
+            
+            newDetections.textContent = Math.max(0, parseInt(newDetections.textContent) - 1);
+            established.textContent = parseInt(established.textContent) + 1;
+        }
+        
+        function denySlang() {
+            if (!currentClusterId) return;
+            showNotification('New slang pattern rejected. Will continue monitoring.', 'warning');
+            document.getElementById('cluster-info').classList.remove('active');
+            
+            const newDetections = document.getElementById('new-detections');
+            newDetections.textContent = Math.max(0, parseInt(newDetections.textContent) - 1);
+        }
+        
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+        
+        function updateStats(clusterData) {
+            const established = clusterData.filter(c => c.type === 'established').length;
+            const emerging = clusterData.filter(c => c.type === 'emerging').length;
+            const newDetections = clusterData.filter(c => c.type === 'new').length;
+            
+            document.getElementById('established-clusters').textContent = established;
+            document.getElementById('emerging-clusters').textContent = emerging;
+            document.getElementById('new-detections').textContent = newDetections;
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = (window.innerWidth - 250) / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth - 250, window.innerHeight);
+        });
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            initGalaxy();
+            updateNavAlertBadge();
+            setInterval(updateNavAlertBadge, 5000);
+            
+            function addLogMessage(message, type = 'info') {
+                const logContainer = document.getElementById('agentLog');
+                const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                
+                const logEntry = document.createElement('div');
+                logEntry.className = 'log-entry';
+                logEntry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-info">${message}</span>`;
+                
+                logContainer.prepend(logEntry);
+                
+                const entries = logContainer.querySelectorAll('.log-entry');
+                if (entries.length > 8) {
+                    entries[entries.length - 1].remove();
+                }
+            }
+            
+            const drugActivities = [
+                "Analyzing 'white' cluster embeddings...",
+                "New codeword detected: 'ski trip'",
+                "Merging 'powder' and 'snow' clusters",
+                "Semantic similarity: 87% match to cocaine network",
+                "Emerging pattern: 'dance fever' (fentanyl)",
+                "Vector clustering complete for 156 messages",
+                "New slang: 'china girl' detected in Telegram",
+                "Updating centroids for heroin network"
+            ];
+            
+            setInterval(() => {
+                const randomActivity = drugActivities[Math.floor(Math.random() * drugActivities.length)];
+                addLogMessage(randomActivity, 'info');
+            }, 6000);
+        });
+        
+        function updateAgentStatus() {
+            fetch('/api/agents')
+                .then(response => response.json())
+                .then(data => {
+                    data.agents.forEach(agent => {
+                        const statusItem = document.getElementById(`${agent.id}-status`);
+                        if (statusItem) {
+                            const indicator = statusItem.querySelector('.status-indicator');
+                            const span = statusItem.querySelector('span');
+                            
+                            if (agent.status === 'running') {
+                                indicator.classList.remove('status-inactive');
+                                indicator.classList.add('status-active');
+                                span.textContent = `${agent.name} (Running)`;
+                            } else {
+                                indicator.classList.remove('status-active');
+                                indicator.classList.add('status-inactive');
+                                span.textContent = agent.name;
+                            }
+                        }
+                    });
+                });
+        }
+        
+        updateAgentStatus();
+        setInterval(updateAgentStatus, 5000);
+    </script>
+</body>
+</html>

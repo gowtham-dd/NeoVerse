@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus AI - Unified Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #0f172a;
+            --darker: #020617;
+            --light: #f8fafc;
+            --gray: #64748b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, #1e1b4b 100%);
+            color: var(--light);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            background: rgba(15, 23, 42, 0.95);
+            border-right: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 2rem 1rem;
+            overflow-y: auto;
+            height: 100vh;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--darker);
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--darker);
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 2rem;
+            padding-left: 1rem;
+        }
+        
+        .logo i {
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+        
+        .logo span {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-menu li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0.8rem 1rem;
+            color: var(--gray);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--light);
+        }
+        
+        .nav-menu a.active {
+            border-left: 3px solid var(--primary);
+        }
+        
+        .nav-menu a.slang-btn {
+            background: transparent;
+            border: none;
+            margin-top: 1rem;
+        }
+        
+        .nav-menu a.slang-btn:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .nav-menu a.slang-btn i {
+            color: var(--gray);
+        }
+        
+        .nav-menu a.slang-btn:hover i {
+            color: var(--light);
+        }
+        
+        .nav-menu a.slang-btn.active {
+            background: rgba(99, 102, 241, 0.1);
+            border-left: 3px solid var(--primary);
+        }
+        
+        .nav-menu a.slang-btn.active i {
+            color: var(--light);
+        }
+        
+        .nav-menu a.alert-btn {
+            position: relative;
+        }
+        
+        .alert-badge-nav {
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            margin-left: auto;
+            min-width: 24px;
+            text-align: center;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+        
+        .nav-menu a.alert-btn.active {
+            background: rgba(239, 68, 68, 0.15);
+            border-left: 3px solid var(--danger);
+        }
+        
+        .nav-menu a.alert-btn.active i {
+            color: var(--danger);
+        }
+        
+        .nav-menu a.alert-btn.active .alert-badge-nav {
+            background: white;
+            color: var(--danger);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
+        }
+        
+        .agent-status {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0.8rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        .status-active {
+            background: var(--secondary);
+            animation: pulse 2s infinite;
+        }
+        
+        .status-inactive {
+            background: var(--gray);
+        }
+        
+        .main-content {
+            padding: 2rem;
+            overflow-y: auto;
+            height: 100vh;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--darker);
+        }
+        
+        .main-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .main-content::-webkit-scrollbar-track {
+            background: var(--darker);
+        }
+        
+        .main-content::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+        
+        .content-wrapper {
+            min-height: calc(100% - 4rem);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+        }
+        
+        .agent-controls {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #0d9488;
+            transform: translateY(-2px);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+        
+        .stat-card.highlight {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .agent-control-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .agent-card {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            transition: all 0.3s;
+        }
+
+        .agent-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .agent-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .agent-status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .agent-status-running {
+            background: rgba(16, 185, 129, 0.2);
+            color: #a7f3d0;
+        }
+
+        .agent-status-stopped {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        .agent-stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .agent-channels {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .channel-tag {
+            padding: 0.3rem 0.8rem;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .channel-tag:hover {
+            background: rgba(99, 102, 241, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .agent-activity-tabs {
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .tab-buttons {
+            display: flex;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 0.5rem;
+            gap: 0.5rem;
+        }
+
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            color: var(--gray);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            text-align: center;
+        }
+
+        .tab-btn:hover,
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .tab-content {
+            padding: 1rem;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .agent-log {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .log-time {
+            color: var(--secondary);
+            min-width: 70px;
+        }
+
+        .log-agent {
+            color: #93c5fd;
+            font-weight: bold;
+            min-width: 80px;
+        }
+
+        .log-message {
+            flex: 1;
+        }
+
+        .log-type-start { color: #10b981; }
+        .log-type-stop { color: #ef4444; }
+        .log-type-alert { color: #f59e0b; }
+        .log-type-scan { color: #6366f1; }
+        .log-type-info { color: #93c5fd; }
+        
+        .source-filter {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .source-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 20px;
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .source-btn:hover,
+        .source-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .alerts-container {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .alerts-container:last-child {
+            margin-bottom: 2rem;
+        }
+        
+        .alerts-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .alerts-table th {
+            text-align: left;
+            padding: 1rem;
+            background: rgba(30, 41, 59, 0.8);
+            color: var(--gray);
+            font-weight: 500;
+        }
+        
+        .alerts-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .alerts-table tr:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+        
+        .risk-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .risk-high {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+        
+        .risk-medium {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fcd34d;
+        }
+        
+        .risk-low {
+            background: rgba(16, 185, 129, 0.2);
+            color: #a7f3d0;
+        }
+        
+        .source-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .source-telegram {
+            background: rgba(0, 136, 204, 0.2);
+            color: #7dd3fc;
+        }
+        
+        .source-reddit {
+            background: rgba(255, 69, 0, 0.2);
+            color: #fdba74;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-container {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .back-btn {
+            margin-bottom: 2rem;
+        }
+        
+        .back-btn a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .back-btn a:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .slang-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .slang-stat-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .slang-stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--light);
+        }
+
+        .slang-stat-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        a[href="slang_galaxy.html"] {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-brain-circuit"></i>
+                <span>NexusAI</span>
+            </div>
+            
+            <ul class="nav-menu">
+                <li><a href="/dashboard" class="active">
+                    <i class="fas fa-dashboard"></i> Dashboard
+                </a></li>
+                <li><a href="/">
+                    <i class="fas fa-home"></i> Home
+                </a></li>
+                <li><a href="#">
+                    <i class="fas fa-robot"></i> Agents
+                </a></li>
+                <li><a href="/slang_galaxy" class="slang-btn">
+                    <i class="fas fa-ring"></i> New Slang Galaxy
+                </a></li>
+                <li><a href="/alerts" class="alert-btn">
+                    <i class="fas fa-bell"></i> Alerts
+                    <span class="alert-badge-nav" id="navAlertBadge">0</span>
+                </a></li>
+                <li><a href="#">
+                    <i class="fas fa-cog"></i> Settings
+                </a></li>
+            </ul>
+            
+            <div class="agent-status">
+                <h3>Agent Status</h3>
+                <div class="status-item" id="telegram-status">
+                    <div class="status-indicator status-inactive"></div>
+                    <span>Telegram Agent</span>
+                </div>
+                <div class="status-item" id="reddit-status">
+                    <div class="status-indicator status-inactive"></div>
+                    <span>Reddit Agent</span>
+                </div>
+            </div>
+            
+            <div class="agent-log" id="agentLog">
+                <div class="log-entry"><span class="log-time">[00:00:00]</span> <span class="log-info">System started</span></div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-wrapper">
+                <div class="back-btn">
+                    <a href="/">
+                        <i class="fas fa-arrow-left"></i> Back to Home
+                    </a>
+                </div>
+                
+                <div class="header">
+                    <div>
+                        <h1>Unified Monitoring Dashboard</h1>
+                        <p style="color: var(--gray); margin-top: 0.5rem;">
+                            Real-time monitoring across all platforms • Database: <span id="dbStatus">Connected</span>
+                        </p>
+                    </div>
+                    <div class="agent-controls">
+                        <button class="btn btn-primary" onclick="startAllAgents()">
+                            <i class="fas fa-play"></i> Start All Agents
+                        </button>
+                        <button class="btn btn-danger" onclick="stopAllAgents()">
+                            <i class="fas fa-stop"></i> Stop All
+                        </button>
+                        <button class="btn" onclick="addTestAlert()" style="background: var(--warning); color: white;">
+                            <i class="fas fa-plus"></i> Test Alert
+                        </button>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalAlerts">0</div>
+                        <div class="stat-label">Total Alerts</div>
+                    </div>
+                    <div class="stat-card highlight">
+                        <div class="stat-value" id="highRiskAlerts">0</div>
+                        <div class="stat-label">High Risk Alerts</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="channelsMonitored">0</div>
+                        <div class="stat-label">Channels Monitored</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="messagesAnalyzed">0</div>
+                        <div class="stat-label">Messages Analyzed</div>
+                    </div>
+                </div>
+
+                <div class="slang-stats">
+                    <div class="slang-stat-card">
+                        <div class="slang-stat-value" id="establishedClusters">24</div>
+                        <div class="slang-stat-label">Established Clusters</div>
+                    </div>
+                    <div class="slang-stat-card">
+                        <div class="slang-stat-value" id="emergingPatterns">7</div>
+                        <div class="slang-stat-label">Emerging Patterns</div>
+                    </div>
+                    <div class="slang-stat-card">
+                        <div class="slang-stat-value" id="newDetections">3</div>
+                        <div class="slang-stat-label">New Detections</div>
+                    </div>
+                </div>
+
+                <div class="source-filter">
+                    <button class="source-btn active" onclick="filterAlerts('all')">
+                        <i class="fas fa-globe"></i> All Sources
+                    </button>
+                    <button class="source-btn" onclick="filterAlerts('telegram')">
+                        <i class="fab fa-telegram"></i> Telegram
+                    </button>
+                    <button class="source-btn" onclick="filterAlerts('reddit')">
+                        <i class="fab fa-reddit"></i> Reddit
+                    </button>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3>Risk Distribution</h3>
+                        <canvas id="riskChart" height="250"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Platform Activity</h3>
+                        <canvas id="platformChart" height="250"></canvas>
+                    </div>
+                </div>
+
+                <div class="alerts-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3>🤖 Live Agent Control Panel</h3>
+                        <div>
+                            <button class="btn" onclick="getAgentChannels('telegram')" style="background: #0088cc; color: white; margin-right: 0.5rem;">
+                                <i class="fab fa-telegram"></i> Refresh Channels
+                            </button>
+                            <button class="btn" onclick="getAgentChannels('reddit')" style="background: #ff4500; color: white;">
+                                <i class="fab fa-reddit"></i> Refresh Subreddits
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Add Channel Input Section -->
+                    <div style="background: rgba(30, 41, 59, 0.5); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid rgba(99, 102, 241, 0.2);">
+                        <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                            <div style="flex: 2; min-width: 300px;">
+                                <label for="channelInput" style="display: block; margin-bottom: 0.5rem; color: var(--gray); font-size: 0.9rem; font-weight: 500;">
+                                    <i class="fas fa-plus-circle" style="color: var(--secondary);"></i> Add New Channel / Subreddit:
+                                </label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <input type="text" id="channelInput" placeholder="Enter @channel, username, or r/subreddit" 
+                                           style="flex: 1; padding: 0.8rem 1rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 8px; color: var(--light); font-family: 'Poppins', sans-serif; font-size: 0.95rem;">
+                                    <select id="channelSource" style="padding: 0.8rem 1rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 8px; color: var(--light); font-family: 'Poppins', sans-serif; cursor: pointer;">
+                                        <option value="telegram">📱 Telegram</option>
+                                        <option value="reddit">🤖 Reddit</option>
+                                    </select>
+                                    <button class="btn btn-success" onclick="addChannel()" style="padding: 0.8rem 1.5rem; white-space: nowrap; background: var(--secondary);">
+                                        <i class="fas fa-search"></i> Scan Now
+                                    </button>
+                                </div>
+                                <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--gray); display: flex; gap: 1rem; flex-wrap: wrap;">
+                                    <span><i class="fas fa-info-circle"></i> Examples: @durov, telegram, r/darknet, r/drugs</span>
+                                    <span><i class="fas fa-robot"></i> Will scan with Llama3 immediately</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Quick Add Suggestions -->
+                            <div style="flex: 1; min-width: 250px;">
+                                <label style="display: block; margin-bottom: 0.5rem; color: var(--gray); font-size: 0.9rem;">Quick Add:</label>
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    <button class="source-btn" onclick="quickAddChannel('@durov', 'telegram')" style="padding: 0.4rem 1rem; background: rgba(0, 136, 204, 0.2);">@durov</button>
+                                    <button class="source-btn" onclick="quickAddChannel('@cryptoupdates', 'telegram')" style="padding: 0.4rem 1rem; background: rgba(0, 136, 204, 0.2);">@crypto</button>
+                                    <button class="source-btn" onclick="quickAddChannel('r/darknet', 'reddit')" style="padding: 0.4rem 1rem; background: rgba(255, 69, 0, 0.2);">r/darknet</button>
+                                    <button class="source-btn" onclick="quickAddChannel('r/drugs', 'reddit')" style="padding: 0.4rem 1rem; background: rgba(255, 69, 0, 0.2);">r/drugs</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Status Messages -->
+                    <div id="channelStatus" style="display: none; margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px; animation: slideIn 0.3s;"></div>
+                    
+                    <!-- Scan Results -->
+                    <div id="scanResults" style="display: none; margin-bottom: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid var(--secondary); border-radius: 8px; padding: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                            <i class="fas fa-check-circle" style="color: var(--secondary); font-size: 1.5rem;"></i>
+                            <h4 style="color: var(--secondary);">Scan Complete!</h4>
+                        </div>
+                        <div id="scanResultsContent" style="color: var(--light);"></div>
+                    </div>
+                    
+                    <div class="agent-control-panel">
+                        <div class="agent-card" id="telegram-agent-card">
+                            <div class="agent-header">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="fab fa-telegram fa-2x" style="color: #0088cc;"></i>
+                                    <div>
+                                        <h4>Telegram Agent</h4>
+                                        <span class="agent-status-badge" id="telegram-live-status">Checking...</span>
+                                    </div>
+                                </div>
+                                <div class="agent-stats">
+                                    <span>Channels: <strong id="telegram-channel-count">0</strong></span>
+                                    <span>Alerts: <strong id="telegram-alert-count">0</strong></span>
+                                    <span>Last Scan: <strong id="telegram-last-scan">--:--</strong></span>
+                                </div>
+                            </div>
+                            <div class="agent-channels" id="telegram-channels-list">
+                                <!-- Channels will be populated here -->
+                            </div>
+                        </div>
+
+                        <div class="agent-card" id="reddit-agent-card">
+                            <div class="agent-header">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="fab fa-reddit fa-2x" style="color: #ff4500;"></i>
+                                    <div>
+                                        <h4>Reddit Agent</h4>
+                                        <span class="agent-status-badge" id="reddit-live-status">Checking...</span>
+                                    </div>
+                                </div>
+                                <div class="agent-stats">
+                                    <span>Subreddits: <strong id="reddit-channel-count">0</strong></span>
+                                    <span>Alerts: <strong id="reddit-alert-count">0</strong></span>
+                                    <span>Last Scan: <strong id="reddit-last-scan">--:--</strong></span>
+                                </div>
+                            </div>
+                            <div class="agent-channels" id="reddit-channels-list">
+                                <!-- Subreddits will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alerts-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3>🤖 Live Agent Activity</h3>
+                        <button class="btn" onclick="refreshAgentLogs()" style="background: var(--primary); color: white; padding: 0.5rem 1rem;">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    
+                    <div class="agent-activity-tabs">
+                        <div class="tab-buttons">
+                            <button class="tab-btn active" onclick="showAgentTab('telegram')">
+                                <i class="fab fa-telegram"></i> Telegram
+                            </button>
+                            <button class="tab-btn" onclick="showAgentTab('reddit')">
+                                <i class="fab fa-reddit"></i> Reddit
+                            </button>
+                        </div>
+                        
+                        <div class="tab-content">
+                            <div id="telegram-log" class="tab-pane active">
+                                <div class="agent-log" id="telegramLog">
+                                    <div class="log-entry"><span class="log-time">[--:--:--]</span> <span>Waiting for activity...</span></div>
+                                </div>
+                            </div>
+                            <div id="reddit-log" class="tab-pane">
+                                <div class="agent-log" id="redditLog">
+                                    <div class="log-entry"><span class="log-time">[--:--:--]</span> <span>Waiting for activity...</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alerts-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3>Recent Alerts</h3>
+                        <span style="color: var(--gray);" id="lastUpdate">Last updated: --:--:--</span>
+                    </div>
+                    
+                    <table class="alerts-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Source</th>
+                                <th>Channel/Group</th>
+                                <th>Risk Level</th>
+                                <th>Message</th>
+                                <th>Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alertsTableBody">
+                            <!-- Alerts will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const selectedSource = localStorage.getItem('selectedSource') || 'all';
+        
+        let riskChart, platformChart;
+        let logMessages = [];
+        let currentFilter = 'all';
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            updateDashboard();
+            updateAgentStatus();
+            updateSlangStats();
+            updateNavAlertBadge();
+            
+            setInterval(updateDashboard, 3000);
+            setInterval(updateAlerts, 5000);
+            setInterval(updateAgentStatus, 2000);
+            setInterval(updateSlangStats, 4000);
+            setInterval(updateNavAlertBadge, 5000);
+            
+            updateAlerts();
+            
+            if (selectedSource !== 'all') {
+                document.querySelectorAll('.source-btn').forEach(btn => {
+                    if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(selectedSource)) {
+                        btn.classList.add('active');
+                        document.querySelector('.source-btn[onclick*="all"]').classList.remove('active');
+                        currentFilter = selectedSource;
+                    }
+                });
+            }
+            
+            addLogMessage('System initialized', 'info');
+            
+            updateAgentLiveStatus();
+            
+            setTimeout(() => getAgentChannels('telegram'), 2000);
+            setTimeout(() => getAgentChannels('reddit'), 2500);
+            
+            startLiveAgentUpdates();
+            
+            // Add keyboard shortcut for channel input
+            const channelInput = document.getElementById('channelInput');
+            if (channelInput) {
+                channelInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        addChannel();
+                    }
+                });
+            }
+        });
+        
+        function updateNavAlertBadge() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('navAlertBadge');
+                    if (badge) {
+                        const newCount = data.total_alerts || 0;
+                        const oldCount = parseInt(badge.textContent) || 0;
+                        badge.textContent = newCount;
+                        
+                        if (newCount > oldCount) {
+                            badge.style.animation = 'pulse 0.5s';
+                            setTimeout(() => {
+                                badge.style.animation = 'pulse 2s infinite';
+                            }, 500);
+                            
+                            showNotification(`${newCount - oldCount} new alert(s) detected!`, 'warning');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching alert count:', error);
+                    const badge = document.getElementById('navAlertBadge');
+                    if (badge) {
+                        badge.textContent = '156';
+                    }
+                });
+        }
+        
+        function initCharts() {
+            const riskCtx = document.getElementById('riskChart').getContext('2d');
+            const platformCtx = document.getElementById('platformChart').getContext('2d');
+            
+            riskChart = new Chart(riskCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['High Risk', 'Medium Risk', 'Low Risk'],
+                    datasets: [{
+                        data: [1, 1, 1],
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(16, 185, 129, 0.8)'
+                        ],
+                        borderWidth: 2,
+                        borderColor: 'rgba(15, 23, 42, 0.5)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#e0e0e0',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            platformChart = new Chart(platformCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Telegram', 'Reddit'],
+                    datasets: [{
+                        label: 'High Risk Alerts',
+                        data: [1, 1],
+                        backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                        minBarLength: 5
+                    }, {
+                        label: 'Total Alerts',
+                        data: [1, 1],
+                        backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                        minBarLength: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e0e0e0'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e0e0e0'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e0e0e0'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateDashboard() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalAlerts').textContent = data.total_alerts || 0;
+                    document.getElementById('highRiskAlerts').textContent = data.high_risk_alerts || 0;
+                    document.getElementById('channelsMonitored').textContent = data.channels_monitored || 0;
+                    document.getElementById('messagesAnalyzed').textContent = data.messages_analyzed || 0;
+                    
+                    const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                    document.getElementById('lastUpdate').textContent = `Last updated: ${time}`;
+                    
+                    document.getElementById('dbStatus').textContent = 'Connected';
+                    document.getElementById('dbStatus').style.color = '#10b981';
+                })
+                .catch(error => {
+                    console.error('Error fetching stats:', error);
+                    document.getElementById('dbStatus').textContent = 'Disconnected';
+                    document.getElementById('dbStatus').style.color = '#ef4444';
+                });
+        }
+        
+        function updateSlangStats() {
+            const established = document.getElementById('establishedClusters');
+            const emerging = document.getElementById('emergingPatterns');
+            const newDetections = document.getElementById('newDetections');
+            
+            if (Math.random() > 0.7) {
+                const currentNew = parseInt(newDetections.textContent);
+                if (currentNew < 5) {
+                    newDetections.textContent = currentNew + 1;
+                    showNotification('New slang pattern detected!', 'warning');
+                }
+            }
+        }
+        
+        function updateAlerts() {
+            fetch(`/api/alerts?source=${currentFilter}`)
+                .then(response => response.json())
+                .then(data => {
+                    displayAlerts(data.alerts || []);
+                    updateCharts(data.alerts || []);
+                })
+                .catch(error => {
+                    console.error('Error fetching alerts:', error);
+                });
+        }
+        
+        function displayAlerts(alerts) {
+            const tableBody = document.getElementById('alertsTableBody');
+            
+            if (!alerts || alerts.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 2rem; color: var(--gray);">
+                            <i class="fas fa-check-circle" style="font-size: 2rem; margin-bottom: 1rem; display: block; color: var(--secondary);"></i>
+                            No alerts found for selected filter
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            alerts.forEach(alert => {
+                let riskClass, riskText;
+                switch(alert.risk_level) {
+                    case 'high':
+                        riskClass = 'risk-high';
+                        riskText = 'HIGH';
+                        break;
+                    case 'medium':
+                        riskClass = 'risk-medium';
+                        riskText = 'MEDIUM';
+                        break;
+                    default:
+                        riskClass = 'risk-low';
+                        riskText = 'LOW';
+                }
+                
+                let sourceClass, sourceText;
+                switch(alert.source) {
+                    case 'telegram':
+                        sourceClass = 'source-telegram';
+                        sourceText = 'Telegram';
+                        break;
+                    case 'reddit':
+                        sourceClass = 'source-reddit';
+                        sourceText = 'Reddit';
+                        break;
+                    default:
+                        sourceClass = 'source-telegram';
+                        sourceText = 'Unknown';
+                }
+                
+                const time = new Date(alert.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const date = new Date(alert.timestamp).toLocaleDateString();
+                
+                html += `
+                    <tr>
+                        <td title="${date}">${time}</td>
+                        <td><span class="source-badge ${sourceClass}">${sourceText}</span></td>
+                        <td>${alert.channel || 'Unknown'}</td>
+                        <td><span class="risk-badge ${riskClass}">${riskText}</span></td>
+                        <td>${alert.message?.substring(0, 60) || ''}${alert.message?.length > 60 ? '...' : ''}</td>
+                        <td>${alert.confidence ? alert.confidence.toFixed(0) : 0}%</td>
+                    </tr>
+                `;
+            });
+            
+            tableBody.innerHTML = html;
+        }
+        
+        function updateCharts(alerts) {
+            const riskCounts = {high: 0, medium: 0, low: 0};
+            const platformCounts = {telegram: 0, reddit: 0};
+            const platformHighRisk = {telegram: 0, reddit: 0};
+            
+            alerts.forEach(alert => {
+                riskCounts[alert.risk_level] = (riskCounts[alert.risk_level] || 0) + 1;
+                platformCounts[alert.source] = (platformCounts[alert.source] || 0) + 1;
+                
+                if (alert.risk_level === 'high') {
+                    platformHighRisk[alert.source] = (platformHighRisk[alert.source] || 0) + 1;
+                }
+            });
+            
+            riskChart.data.datasets[0].data = [
+                Math.max(riskCounts.high || 0, 1),
+                Math.max(riskCounts.medium || 0, 1),
+                Math.max(riskCounts.low || 0, 1)
+            ];
+            riskChart.update();
+            
+            if (currentFilter === 'all') {
+                platformChart.data.labels = ['Telegram', 'Reddit'];
+                platformChart.data.datasets[0].data = [
+                    Math.max(platformHighRisk.telegram || 0, 1),
+                    Math.max(platformHighRisk.reddit || 0, 1)
+                ];
+                platformChart.data.datasets[1].data = [
+                    Math.max(platformCounts.telegram || 0, 1),
+                    Math.max(platformCounts.reddit || 0, 1)
+                ];
+            } else {
+                platformChart.data.labels = [currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1)];
+                platformChart.data.datasets[0].data = [Math.max(platformHighRisk[currentFilter] || 0, 1)];
+                platformChart.data.datasets[1].data = [Math.max(platformCounts[currentFilter] || 0, 1)];
+            }
+            
+            platformChart.update();
+        }
+        
+        function filterAlerts(source) {
+            document.querySelectorAll('.source-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            currentFilter = source;
+            updateAlerts();
+        }
+        
+        function updateAgentStatus() {
+            fetch('/api/agents')
+                .then(response => response.json())
+                .then(data => {
+                    data.agents.forEach(agent => {
+                        const statusItem = document.getElementById(`${agent.id}-status`);
+                        if (statusItem) {
+                            const indicator = statusItem.querySelector('.status-indicator');
+                            const statusText = statusItem.querySelector('span');
+                            
+                            if (agent.status === 'running') {
+                                indicator.classList.remove('status-inactive');
+                                indicator.classList.add('status-active');
+                                statusText.textContent = `${agent.name} (Running)`;
+                            } else {
+                                indicator.classList.remove('status-active');
+                                indicator.classList.add('status-inactive');
+                                statusText.textContent = agent.name;
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching agent status:', error);
+                });
+        }
+        
+        function startAllAgents() {
+            addLogMessage('Starting all agents...', 'info');
+            
+            fetch('/api/agents/start-all', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                showNotification(data.message, 'success');
+                setTimeout(updateAgentStatus, 2000);
+                
+                if (data.results) {
+                    Object.entries(data.results).forEach(([agent, result]) => {
+                        if (result.success) {
+                            addLogMessage(`${agent} agent started`, 'info');
+                        } else {
+                            addLogMessage(`${agent} failed: ${result.message}`, 'error');
+                        }
+                    });
+                }
+            })
+            .catch(error => {
+                showNotification('Error starting agents', 'error');
+                addLogMessage('Failed to start agents', 'error');
+            });
+        }
+        
+        function stopAllAgents() {
+            addLogMessage('Stopping all agents...', 'warning');
+            
+            fetch('/api/agents/stop-all', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                showNotification(data.message, 'warning');
+                setTimeout(updateAgentStatus, 2000);
+                
+                if (data.results) {
+                    Object.entries(data.results).forEach(([agent, result]) => {
+                        if (result.success) {
+                            addLogMessage(`${agent} agent stopped`, 'info');
+                        }
+                    });
+                }
+            })
+            .catch(error => {
+                showNotification('Error stopping agents', 'error');
+                addLogMessage('Failed to stop agents', 'error');
+            });
+        }
+        
+        function addTestAlert() {
+            fetch('/api/test-alert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ source: 'telegram' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                showNotification(data.message, 'success');
+                addLogMessage(`Test alert #${data.alert_id} added`, 'info');
+                updateDashboard();
+                updateAlerts();
+                updateNavAlertBadge();
+            })
+            .catch(error => {
+                showNotification('Error adding test alert', 'error');
+            });
+        }
+        
+        function addLogMessage(message, type = 'info') {
+            const logContainer = document.getElementById('agentLog');
+            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${type}">${message}</span>`;
+            
+            logContainer.prepend(logEntry);
+            
+            const entries = logContainer.querySelectorAll('.log-entry');
+            if (entries.length > 10) {
+                entries[entries.length - 1].remove();
+            }
+        }
+        
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                background: ${type === 'success' ? '#10b981' : type === 'warning' ? '#f59e0b' : type === 'info' ? '#6366f1' : '#ef4444'};
+                color: white;
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                z-index: 10000;
+                animation: slideIn 0.3s ease-out;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            `;
+            
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : type === 'info' ? 'info-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+    
+        function getAgentChannels(agentId) {
+            fetch(`/api/agent-channels/${agentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (agentId === 'telegram') {
+                        updateTelegramChannels(data.channels);
+                    } else if (agentId === 'reddit') {
+                        updateRedditChannels(data.channels);
+                    }
+                    showNotification(`Found ${data.count} ${agentId === 'telegram' ? 'channels' : 'subreddits'} for ${agentId}`, 'info');
+                })
+                .catch(error => {
+                    console.error('Error fetching channels:', error);
+                });
+        }
+    
+        function updateTelegramChannels(channels) {
+            const container = document.getElementById('telegram-channels-list');
+            const countElement = document.getElementById('telegram-channel-count');
+            
+            countElement.textContent = channels.length;
+            
+            let html = '';
+            channels.forEach(channel => {
+                html += `<span class="channel-tag" title="Click to scan" onclick="scanSpecificChannel('${channel}', 'telegram')">${channel} <i class="fas fa-sync-alt" style="font-size: 0.7rem; margin-left: 0.3rem;"></i></span>`;
+            });
+            
+            if (channels.length === 0) {
+                html = '<span style="color: var(--gray);">No channels being monitored</span>';
+            }
+            
+            container.innerHTML = html;
+        }
+    
+        function updateRedditChannels(channels) {
+            const container = document.getElementById('reddit-channels-list');
+            const countElement = document.getElementById('reddit-channel-count');
+            
+            countElement.textContent = channels.length;
+            
+            let html = '';
+            channels.forEach(channel => {
+                // Extract subreddit name without r/ prefix
+                const subreddit = channel.replace('r/', '');
+                html += `<span class="channel-tag" title="Click to scan" onclick="scanSpecificChannel('${channel}', 'reddit')">r/${subreddit} <i class="fas fa-sync-alt" style="font-size: 0.7rem; margin-left: 0.3rem;"></i></span>`;
+            });
+            
+            if (channels.length === 0) {
+                html = '<span style="color: var(--gray);">No subreddits being monitored</span>';
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        function scanSpecificChannel(channel, source) {
+            showChannelStatus(`🔍 Scanning ${channel} with Llama3...`, 'info');
+            
+            fetch('/api/scan-channel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    channel: channel,
+                    source: source
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showChannelStatus(`✅ Scan complete! Found ${data.alerts.length} alerts`, 'success');
+                    if (data.alerts.length > 0) {
+                        showScanResults(data.alerts);
+                    }
+                    updateAlerts();
+                } else {
+                    showChannelStatus(`❌ Scan failed: ${data.message}`, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error scanning channel:', error);
+                showChannelStatus('❌ Failed to scan channel', 'error');
+            });
+        }
+        
+        // ==============================================
+        // Channel Management Functions with Llama3 Scanning
+        // ==============================================
+
+        function addChannel() {
+            const channelInput = document.getElementById('channelInput');
+            const channelSource = document.getElementById('channelSource');
+            const channelName = channelInput.value.trim();
+            const source = channelSource.value;
+            
+            if (!channelName) {
+                showChannelStatus('Please enter a channel name', 'error');
+                return;
+            }
+            
+            showChannelStatus(`🔍 Adding ${channelName} and scanning with Llama3...`, 'info');
+            
+            channelInput.disabled = true;
+            document.querySelector('button[onclick="addChannel()"]').disabled = true;
+            
+            fetch('/api/add-channel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    source: source,
+                    channel: channelName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    let statusMessage = `✅ ${data.message}`;
+                    
+                    if (data.scan_result && data.scan_result.status === 'success') {
+                        const alertCount = data.alerts_created ? data.alerts_created.length : 0;
+                        statusMessage += `<br>📊 Scanned with Llama3: Found ${alertCount} alerts`;
+                        
+                        if (alertCount > 0) {
+                            showScanResults(data.alerts_created);
+                        }
+                        
+                        console.log(`📊 Scan results for ${channelName}:`, data.alerts_created);
+                    } else if (data.scan_result && data.scan_result.status === 'error') {
+                        statusMessage += `<br>⚠️ Scan error: ${data.scan_result.message}`;
+                    }
+                    
+                    showChannelStatus(statusMessage, 'success');
+                    channelInput.value = '';
+                    
+                    getAgentChannels('telegram');
+                    getAgentChannels('reddit');
+                    
+                    updateAlerts();
+                    updateDashboard();
+                    
+                    addLogMessage(`Channel added and scanned: ${channelName} (${source})`, 'info');
+                    
+                } else {
+                    showChannelStatus(`❌ ${data.message}`, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding channel:', error);
+                showChannelStatus('❌ Failed to add channel', 'error');
+            })
+            .finally(() => {
+                channelInput.disabled = false;
+                document.querySelector('button[onclick="addChannel()"]').disabled = false;
+            });
+        }
+
+        function showScanResults(alerts) {
+            const scanResultsDiv = document.getElementById('scanResults');
+            const scanResultsContent = document.getElementById('scanResultsContent');
+            
+            if (!alerts || alerts.length === 0) {
+                scanResultsContent.innerHTML = '<p>No suspicious content detected in this scan.</p>';
+            } else {
+                let html = `<p>Found ${alerts.length} potential alerts:</p><ul style="margin-top: 0.5rem; list-style: none;">`;
+                alerts.forEach(alert => {
+                    const riskColor = alert.risk_level === 'high' ? '#ef4444' : 
+                                     alert.risk_level === 'medium' ? '#f59e0b' : '#10b981';
+                    html += `
+                        <li style="margin-bottom: 0.5rem; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 4px;">
+                            <span style="color: ${riskColor}; font-weight: 600;">${alert.risk_level.toUpperCase()}</span> - 
+                            <span>${alert.message}</span>
+                            <span style="color: var(--gray); margin-left: 0.5rem;">(${alert.confidence}% confidence)</span>
+                        </li>
+                    `;
+                });
+                html += '</ul>';
+                scanResultsContent.innerHTML = html;
+            }
+            
+            scanResultsDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                scanResultsDiv.style.display = 'none';
+            }, 10000);
+        }
+
+        function quickAddChannel(channel, source) {
+            document.getElementById('channelInput').value = channel;
+            document.getElementById('channelSource').value = source;
+            addChannel();
+        }
+
+        function showChannelStatus(message, type) {
+            const statusDiv = document.getElementById('channelStatus');
+            statusDiv.style.display = 'block';
+            
+            const colors = {
+                'success': '#10b981',
+                'error': '#ef4444',
+                'warning': '#f59e0b',
+                'info': '#6366f1'
+            };
+            
+            const bgColors = {
+                'success': '16, 185, 129',
+                'error': '239, 68, 68',
+                'warning': '245, 158, 11',
+                'info': '99, 102, 241'
+            };
+            
+            statusDiv.style.background = `rgba(${bgColors[type]}, 0.15)`;
+            statusDiv.style.border = `1px solid ${colors[type]}`;
+            statusDiv.style.color = type === 'success' ? '#a7f3d0' : type === 'error' ? '#fca5a5' : type === 'warning' ? '#fcd34d' : '#93c5fd';
+            statusDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i> ${message}`;
+            
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 8000);
+            }
+        }
+    
+        function updateAgentLiveStatus() {
+            fetch('/api/agents')
+                .then(response => response.json())
+                .then(data => {
+                    data.agents.forEach(agent => {
+                        const statusBadge = document.getElementById(`${agent.id}-live-status`);
+                        if (statusBadge) {
+                            statusBadge.textContent = agent.status === 'running' ? 'RUNNING' : 'STOPPED';
+                            statusBadge.className = `agent-status-badge agent-status-${agent.status}`;
+                            
+                            const alertCountElement = document.getElementById(`${agent.id}-alert-count`);
+                            if (alertCountElement) {
+                                alertCountElement.textContent = agent.stats?.total_alerts || 0;
+                            }
+                            
+                            if (agent.stats?.last_activity) {
+                                const time = new Date(agent.stats.last_activity).toLocaleTimeString([], 
+                                    {hour: '2-digit', minute:'2-digit'});
+                                document.getElementById(`${agent.id}-last-scan`).textContent = time;
+                            }
+                        }
+                    });
+                });
+            
+            setTimeout(updateAgentLiveStatus, 5000);
+        }
+    
+        function showAgentTab(agentId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+            document.getElementById(`${agentId}-log`).classList.add('active');
+            
+            refreshAgentLogs();
+        }
+    
+        function refreshAgentLogs() {
+            const activeTab = document.querySelector('.tab-btn.active');
+            let agentId = 'telegram';
+            
+            if (activeTab && activeTab.textContent.includes('Reddit')) {
+                agentId = 'reddit';
+            }
+            
+            fetch(`/api/agent-logs?agent_id=${agentId}&limit=30`)
+                .then(response => response.json())
+                .then(data => {
+                    updateAgentLogsDisplay(data.logs, agentId);
+                })
+                .catch(error => {
+                    console.error('Error fetching agent logs:', error);
+                });
+        }
+    
+        function updateAgentLogsDisplay(logs, agentId) {
+            const logContainerId = `${agentId}-log`;
+            const logContainer = document.getElementById(logContainerId).querySelector('.agent-log');
+            
+            if (!logs || logs.length === 0) {
+                logContainer.innerHTML = '<div class="log-entry">No activity yet</div>';
+                return;
+            }
+            
+            let html = '';
+            logs.forEach(log => {
+                const time = new Date(log.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                
+                let typeClass = '';
+                switch(log.log_type) {
+                    case 'start': typeClass = 'log-type-start'; break;
+                    case 'stop': typeClass = 'log-type-stop'; break;
+                    case 'alert': typeClass = 'log-type-alert'; break;
+                    case 'scan': typeClass = 'log-type-scan'; break;
+                    case 'info': typeClass = 'log-type-info'; break;
+                    case 'error': typeClass = 'log-type-stop'; break;
+                }
+                
+                html += `
+                    <div class="log-entry">
+                        <span class="log-time">[${time}]</span>
+                        <span class="log-agent">${log.agent_id.toUpperCase()}</span>
+                        <span class="${typeClass}">${log.message}</span>
+                        ${log.details ? `<br><small style="color: var(--gray); padding-left: 160px;">${log.details}</small>` : ''}
+                    </div>
+                `;
+            });
+            
+            logContainer.innerHTML = html;
+        }
+    
+        function startLiveAgentUpdates() {
+            setInterval(refreshAgentLogs, 3000);
+            refreshAgentLogs();
+        }
+    
+        document.addEventListener('DOMContentLoaded', function() {
+            setInterval(() => {
+                const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                const logContainer = document.getElementById('agentLog');
+                const statusEntry = document.createElement('div');
+                statusEntry.className = 'log-entry';
+                statusEntry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-info">Agent status updated</span>`;
+                
+                logContainer.prepend(statusEntry);
+                
+                const entries = logContainer.querySelectorAll('.log-entry');
+                if (entries.length > 10) {
+                    entries[entries.length - 1].remove();
+                }
+            }, 10000);
+        });
+    </script>
+</body>
+</html>

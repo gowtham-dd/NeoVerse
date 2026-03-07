@@ -1,0 +1,231 @@
+[
+    {
+      "id": 1,
+      "name": "Cocaine Network",
+      "type": "established",
+      "size": 45,
+      "first_detected": "2024-01-15",
+      "last_activity": "2024-03-10",
+      "confidence": 0.95,
+      "keywords": ["#white", "#snow", "#powder", "#coke", "#lines", "#blow", "#nose", "#ski", "#yayo"],
+      "messages": [
+        {"text": "Need fresh white for weekend party", "timestamp": "2024-03-10 14:23", "source": "Telegram"},
+        {"text": "snow delivery available tonight", "timestamp": "2024-03-09 22:15", "source": "Telegram"},
+        {"text": "pure powder 5g ready", "timestamp": "2024-03-08 19:42", "source": "Reddit"},
+        {"text": "ski trip supplies in stock", "timestamp": "2024-03-07 11:30", "source": "Telegram"},
+        {"text": "yayo special this week", "timestamp": "2024-03-06 16:20", "source": "Telegram"}
+      ],
+      "source_distribution": {
+        "Telegram": 32,
+        "Reddit": 13
+      },
+      "common_phrases": ["white edition", "pure snow", "fresh powder", "ski trip", "yayo special"],
+      "risk_level": "high",
+      "related_clusters": [2, 3]
+    },
+    {
+      "id": 2,
+      "name": "Heroin Route",
+      "type": "established",
+      "size": 38,
+      "first_detected": "2024-01-20",
+      "last_activity": "2024-03-09",
+      "confidence": 0.92,
+      "keywords": ["#horse", "#brown", "#smack", "#dope", "#china", "#H", "#boy", "#junk"],
+      "messages": [
+        {"text": "horse tranquilizer available", "timestamp": "2024-03-09 20:10", "source": "Telegram"},
+        {"text": "brown sugar fresh batch", "timestamp": "2024-03-08 15:30", "source": "Reddit"},
+        {"text": "china white special delivery", "timestamp": "2024-03-07 09:45", "source": "Telegram"},
+        {"text": "smack city tonight", "timestamp": "2024-03-06 23:15", "source": "Reddit"}
+      ],
+      "source_distribution": {
+        "Telegram": 24,
+        "Reddit": 14
+      },
+      "common_phrases": ["brown sugar", "china white", "horse medicine", "smack city"],
+      "risk_level": "high",
+      "related_clusters": [1, 8]
+    },
+    {
+      "id": 3,
+      "name": "Meth Circle",
+      "type": "established",
+      "size": 52,
+      "first_detected": "2024-01-10",
+      "last_activity": "2024-03-10",
+      "confidence": 0.94,
+      "keywords": ["#crystal", "#ice", "#glass", "#tina", "#crank", "#speed", "#shards", "#cook"],
+      "messages": [
+        {"text": "crystal clear available", "timestamp": "2024-03-10 11:20", "source": "Telegram"},
+        {"text": "ice cold delivery", "timestamp": "2024-03-09 18:40", "source": "Reddit"},
+        {"text": "glass shards ready", "timestamp": "2024-03-08 22:10", "source": "Telegram"},
+        {"text": "tina needs new friends", "timestamp": "2024-03-07 14:30", "source": "Reddit"}
+      ],
+      "source_distribution": {
+        "Telegram": 34,
+        "Reddit": 18
+      },
+      "common_phrases": ["crystal clear", "ice cold", "glass shards", "tina friends"],
+      "risk_level": "high",
+      "related_clusters": [5]
+    },
+    {
+      "id": 4,
+      "name": "MDMA Empire",
+      "type": "established",
+      "size": 41,
+      "first_detected": "2024-01-18",
+      "last_activity": "2024-03-09",
+      "confidence": 0.91,
+      "keywords": ["#molly", "#ecstasy", "#xtc", "#roll", "#mdma", "#beans", "#thizz", "#love"],
+      "messages": [
+        {"text": "molly pure love available", "timestamp": "2024-03-09 21:30", "source": "Telegram"},
+        {"text": "ecstasy pills green apples", "timestamp": "2024-03-08 17:20", "source": "Reddit"},
+        {"text": "xtc rolling tonight", "timestamp": "2024-03-07 23:45", "source": "Telegram"},
+        {"text": "love drug special", "timestamp": "2024-03-06 19:10", "source": "Reddit"}
+      ],
+      "source_distribution": {
+        "Telegram": 27,
+        "Reddit": 14
+      },
+      "common_phrases": ["pure love", "green apples", "rolling tonight", "love drug"],
+      "risk_level": "high",
+      "related_clusters": [7]
+    },
+    {
+      "id": 5,
+      "name": "Ketamine Supply",
+      "type": "emerging",
+      "size": 18,
+      "first_detected": "2024-02-10",
+      "last_activity": "2024-03-08",
+      "confidence": 0.78,
+      "keywords": ["#ketamine", "#specialK", "#vitaminK", "#ketty", "#horse", "#k"],
+      "messages": [
+        {"text": "special K injection", "timestamp": "2024-03-08 13:15", "source": "Telegram"},
+        {"text": "vitamin K supplement", "timestamp": "2024-03-07 10:30", "source": "Reddit"},
+        {"text": "horse medicine available", "timestamp": "2024-03-06 16:45", "source": "Telegram"},
+        {"text": "k-hole special", "timestamp": "2024-03-05 22:20", "source": "Reddit"}
+      ],
+      "source_distribution": {
+        "Telegram": 11,
+        "Reddit": 7
+      },
+      "common_phrases": ["special K", "vitamin K", "horse medicine", "k-hole"],
+      "risk_level": "medium",
+      "related_clusters": [3]
+    },
+    {
+      "id": 6,
+      "name": "Fentanyl Ring",
+      "type": "emerging",
+      "size": 15,
+      "first_detected": "2024-02-15",
+      "last_activity": "2024-03-09",
+      "confidence": 0.76,
+      "keywords": ["#fent", "#dance", "#china", "#apache", "#drop", "#fentanyl"],
+      "messages": [
+        {"text": "dance fever going around", "timestamp": "2024-03-09 14:20", "source": "Telegram"},
+        {"text": "china girl special blend", "timestamp": "2024-03-08 11:35", "source": "Reddit"},
+        {"text": "apache warrior supplies", "timestamp": "2024-03-07 19:50", "source": "Telegram"},
+        {"text": "drop dead gorgeous", "timestamp": "2024-03-06 08:15", "source": "Reddit"}
+      ],
+      "source_distribution": {
+        "Telegram": 10,
+        "Reddit": 5
+      },
+      "common_phrases": ["dance fever", "china girl", "apache warrior", "drop dead"],
+      "risk_level": "critical",
+      "related_clusters": [1, 2]
+    },
+    {
+      "id": 7,
+      "name": "Xanax Empire",
+      "type": "emerging",
+      "size": 22,
+      "first_detected": "2024-02-12",
+      "last_activity": "2024-03-08",
+      "confidence": 0.81,
+      "keywords": ["#xan", "#bars", "#benzos", "#schoolbus", "#sticks", "#xanax"],
+      "messages": [
+        {"text": "school bus arriving", "timestamp": "2024-03-08 20:10", "source": "Telegram"},
+        {"text": "bars available 2mg", "timestamp": "2024-03-07 15:25", "source": "Reddit"},
+        {"text": "stick supply restocked", "timestamp": "2024-03-06 12:40", "source": "Telegram"},
+        {"text": "xan bars tonight", "timestamp": "2024-03-05 23:55", "source": "Reddit"}
+      ],
+      "source_distribution": {
+        "Telegram": 15,
+        "Reddit": 7
+      },
+      "common_phrases": ["school bus", "bars available", "stick supply", "xan bars"],
+      "risk_level": "medium",
+      "related_clusters": [4]
+    },
+    {
+      "id": 8,
+      "name": "Opioid Loop",
+      "type": "new",
+      "size": 9,
+      "first_detected": "2024-03-01",
+      "last_activity": "2024-03-09",
+      "confidence": 0.65,
+      "keywords": ["#oxy", "#percs", "#vikes", "#pain", "#30s", "#blues"],
+      "messages": [
+        {"text": "pain relief available", "timestamp": "2024-03-09 10:15", "source": "Telegram"},
+        {"text": "blue 30s in stock", "timestamp": "2024-03-08 14:30", "source": "Reddit"},
+        {"text": "perc special tonight", "timestamp": "2024-03-07 17:45", "source": "Telegram"},
+        {"text": "vikes for sale", "timestamp": "2024-03-06 21:20", "source": "Reddit"}
+      ],
+      "source_distribution": {
+        "Telegram": 6,
+        "Reddit": 3
+      },
+      "common_phrases": ["pain relief", "blue 30s", "perc special", "vikes sale"],
+      "risk_level": "medium",
+      "related_clusters": [2]
+    },
+    {
+      "id": 9,
+      "name": "GHB Network",
+      "type": "new",
+      "size": 7,
+      "first_detected": "2024-03-03",
+      "last_activity": "2024-03-08",
+      "confidence": 0.62,
+      "keywords": ["#ghb", "#g", "#liquid", "#fantasy", "#blue"],
+      "messages": [
+        {"text": "liquid fantasy available", "timestamp": "2024-03-08 22:10", "source": "Telegram"},
+        {"text": "blue magic potion", "timestamp": "2024-03-07 19:25", "source": "Reddit"},
+        {"text": "G special tonight", "timestamp": "2024-03-06 13:40", "source": "Telegram"}
+      ],
+      "source_distribution": {
+        "Telegram": 5,
+        "Reddit": 2
+      },
+      "common_phrases": ["liquid fantasy", "blue magic", "G special"],
+      "risk_level": "medium",
+      "related_clusters": []
+    },
+    {
+      "id": 10,
+      "name": "Research Chemicals",
+      "type": "new",
+      "size": 6,
+      "first_detected": "2024-03-04",
+      "last_activity": "2024-03-07",
+      "confidence": 0.58,
+      "keywords": ["#rc", "#research", "#chemicals", "#pellets", "#powders"],
+      "messages": [
+        {"text": "research materials available", "timestamp": "2024-03-07 16:30", "source": "Telegram"},
+        {"text": "lab supplies fresh", "timestamp": "2024-03-06 11:45", "source": "Reddit"},
+        {"text": "chemical samples ready", "timestamp": "2024-03-05 20:15", "source": "Telegram"}
+      ],
+      "source_distribution": {
+        "Telegram": 4,
+        "Reddit": 2
+      },
+      "common_phrases": ["research materials", "lab supplies", "chemical samples"],
+      "risk_level": "low",
+      "related_clusters": []
+    }
+  ]

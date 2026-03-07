@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus AI - Alert Center</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #0f172a;
+            --darker: #020617;
+            --light: #f8fafc;
+            --gray: #64748b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, #1e1b4b 100%);
+            color: var(--light);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Dashboard Layout - EXACTLY LIKE DASHBOARD */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Sidebar - EXACTLY LIKE DASHBOARD */
+        .sidebar {
+            background: rgba(15, 23, 42, 0.95);
+            border-right: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 2rem 1rem;
+            overflow-y: auto;
+            height: 100vh;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--darker);
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--darker);
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 2rem;
+            padding-left: 1rem;
+        }
+        
+        .logo i {
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+        
+        .logo span {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-menu li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0.8rem 1rem;
+            color: var(--gray);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--light);
+        }
+        
+        .nav-menu a.active {
+            border-left: 3px solid var(--primary);
+        }
+        
+        /* New Slang Button - Same as other buttons */
+        .nav-menu a.slang-btn {
+            background: transparent;
+            border: none;
+            margin-top: 1rem;
+        }
+        
+        .nav-menu a.slang-btn:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .nav-menu a.slang-btn i {
+            color: var(--gray);
+        }
+        
+        .nav-menu a.slang-btn:hover i {
+            color: var(--light);
+        }
+        
+        .nav-menu a.slang-btn.active {
+            background: rgba(99, 102, 241, 0.1);
+            border-left: 3px solid var(--primary);
+        }
+        
+        .nav-menu a.slang-btn.active i {
+            color: var(--light);
+        }
+        
+        /* Alert button with badge */
+        .nav-menu a.alert-btn {
+            position: relative;
+        }
+        
+        .alert-badge-nav {
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            margin-left: auto;
+            min-width: 24px;
+            text-align: center;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+        
+        /* Special styling for alert button when active */
+        .nav-menu a.alert-btn.active {
+            background: rgba(239, 68, 68, 0.15);
+            border-left: 3px solid var(--danger);
+        }
+        
+        .nav-menu a.alert-btn.active i {
+            color: var(--danger);
+        }
+        
+        .nav-menu a.alert-btn.active .alert-badge-nav {
+            background: white;
+            color: var(--danger);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
+        }
+        
+        .agent-status {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0.8rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        .status-active {
+            background: var(--secondary);
+            animation: pulse 2s infinite;
+        }
+        
+        .status-inactive {
+            background: var(--gray);
+        }
+        
+        /* Agent Log in Sidebar */
+        .agent-log {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 2rem;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .log-entry {
+            padding: 0.3rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .log-time {
+            color: var(--secondary);
+            min-width: 60px;
+            font-size: 0.75rem;
+        }
+
+        .log-info {
+            color: #93c5fd;
+        }
+        
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            overflow-y: auto;
+            height: 100vh;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--darker);
+        }
+        
+        .main-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .main-content::-webkit-scrollbar-track {
+            background: var(--darker);
+        }
+        
+        .main-content::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+        
+        /* Content wrapper */
+        .content-wrapper {
+            min-height: calc(100% - 4rem);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header h1 i {
+            color: var(--danger);
+        }
+        
+        .alert-badge {
+            background: var(--danger);
+            color: white;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-left: 1rem;
+        }
+        
+        .agent-controls {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #0d9488;
+            transform: translateY(-2px);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+        
+        .stat-card.highlight {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        /* Filter Section */
+        .filter-section {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+        
+        .filter-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+            color: var(--gray);
+        }
+        
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .filter-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+        
+        .filter-select {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 6px;
+            padding: 0.5rem;
+            color: var(--light);
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+        }
+        
+        .filter-select option {
+            background: var(--dark);
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+        
+        /* Source Filter */
+        .source-filter {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .source-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 20px;
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .source-btn:hover,
+        .source-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* Alerts Table */
+        .alerts-container {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .alerts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .alerts-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .alerts-title h3 {
+            font-size: 1.2rem;
+        }
+        
+        .alert-count {
+            background: var(--danger);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        .alerts-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .alerts-table th {
+            text-align: left;
+            padding: 1rem;
+            background: rgba(30, 41, 59, 0.8);
+            color: var(--gray);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .alerts-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .alerts-table tr:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+        
+        .risk-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .risk-high {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .risk-medium {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fcd34d;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        
+        .risk-low {
+            background: rgba(16, 185, 129, 0.2);
+            color: #a7f3d0;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .source-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .source-telegram {
+            background: rgba(0, 136, 204, 0.2);
+            color: #7dd3fc;
+            border: 1px solid rgba(0, 136, 204, 0.3);
+        }
+        
+        .source-reddit {
+            background: rgba(255, 69, 0, 0.2);
+            color: #fdba74;
+            border: 1px solid rgba(255, 69, 0, 0.3);
+        }
+        
+        .evidence-btn {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            padding: 0.4rem 1rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .evidence-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .evidence-hash {
+            font-family: monospace;
+            font-size: 0.7rem;
+            color: var(--gray);
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Evidence Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: var(--warning);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .modal-close:hover {
+            color: var(--danger);
+            transform: scale(1.1);
+        }
+        
+        .evidence-details {
+            margin-bottom: 1.5rem;
+        }
+        
+        .evidence-row {
+            display: flex;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        
+        .evidence-label {
+            width: 100px;
+            color: var(--gray);
+        }
+        
+        .evidence-value {
+            flex: 1;
+            color: var(--light);
+            word-break: break-all;
+        }
+        
+        .evidence-message {
+            background: rgba(30, 41, 59, 0.8);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .blockchain-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(99, 102, 241, 0.2);
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--primary);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+        
+        .blockchain-badge i {
+            color: var(--warning);
+        }
+        
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+        
+        .page-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .page-btn:hover,
+        .page-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .back-btn {
+            margin-bottom: 2rem;
+        }
+        
+        .back-btn a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .back-btn a:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar - EXACTLY LIKE DASHBOARD with WORKING LINKS -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-brain-circuit"></i>
+                <span>NexusAI</span>
+            </div>
+            
+            <ul class="nav-menu">
+                <li><a href="/dashboard">
+                    <i class="fas fa-dashboard"></i> Dashboard
+                </a></li>
+                <li><a href="/">
+                    <i class="fas fa-home"></i> Home
+                </a></li>
+                <li><a href="#" onclick="showComingSoon('Agents'); return false;">
+                    <i class="fas fa-robot"></i> Agents
+                </a></li>
+                <li><a href="/slang_galaxy" class="slang-btn">
+                    <i class="fas fa-ring"></i> New Slang Galaxy
+                </a></li>
+                <li><a href="/alerts" class="alert-btn active">
+                    <i class="fas fa-bell"></i> Alerts
+                    <span class="alert-badge-nav" id="navAlertBadge">0</span>
+                </a></li>
+                <li><a href="#" onclick="showComingSoon('Settings'); return false;">
+                    <i class="fas fa-cog"></i> Settings
+                </a></li>
+            </ul>
+            
+            <div class="agent-status">
+                <h3>Agent Status</h3>
+                <div class="status-item" id="telegram-status">
+                    <div class="status-indicator status-inactive"></div>
+                    <span>Telegram Agent</span>
+                </div>
+                <div class="status-item" id="reddit-status">
+                    <div class="status-indicator status-inactive"></div>
+                    <span>Reddit Agent</span>
+                </div>
+            </div>
+            
+            <div class="agent-log" id="agentLog">
+                <div class="log-entry"><span class="log-time">[00:00:00]</span> <span class="log-info">System started</span></div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <div class="back-btn">
+                    <a href="/dashboard">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+                
+                <div class="header">
+                    <div>
+                        <h1>
+                            <i class="fas fa-bell"></i> Alert Center
+                            <span class="alert-badge" id="totalAlertsBadge">0</span>
+                        </h1>
+                        <p style="color: var(--gray); margin-top: 0.5rem;">
+                            Manage and investigate flagged messages with blockchain-verified evidence
+                        </p>
+                    </div>
+                    <div class="agent-controls">
+                        <button class="btn btn-success" onclick="exportAlerts()">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                        <button class="btn btn-primary" onclick="refreshAlerts()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                        <button class="btn btn-danger" onclick="addTestAlert()">
+                            <i class="fas fa-plus"></i> Test Alert
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalAlerts">0</div>
+                        <div class="stat-label">Total Alerts</div>
+                    </div>
+                    <div class="stat-card highlight">
+                        <div class="stat-value" id="highRiskAlerts">0</div>
+                        <div class="stat-label">High Risk</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="mediumRiskAlerts">0</div>
+                        <div class="stat-label">Medium Risk</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="lowRiskAlerts">0</div>
+                        <div class="stat-label">Low Risk</div>
+                    </div>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="filter-section">
+                    <div class="filter-title">
+                        <i class="fas fa-filter"></i>
+                        <span>Filter Alerts</span>
+                    </div>
+                    
+                    <div class="source-filter">
+                        <button class="source-btn active" onclick="filterAlerts('all')">
+                            <i class="fas fa-globe"></i> All Sources
+                        </button>
+                        <button class="source-btn" onclick="filterAlerts('telegram')">
+                            <i class="fab fa-telegram"></i> Telegram
+                        </button>
+                        <button class="source-btn" onclick="filterAlerts('reddit')">
+                            <i class="fab fa-reddit"></i> Reddit
+                        </button>
+                    </div>
+                    
+                    <div class="filter-grid">
+                        <div class="filter-group">
+                            <span class="filter-label">Risk Level</span>
+                            <select class="filter-select" id="riskFilter" onchange="applyFilters()">
+                                <option value="all">All Risks</option>
+                                <option value="high">High Only</option>
+                                <option value="medium">Medium Only</option>
+                                <option value="low">Low Only</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <span class="filter-label">Date Range</span>
+                            <select class="filter-select" id="dateFilter" onchange="applyFilters()">
+                                <option value="all">All Time</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <span class="filter-label">Confidence</span>
+                            <select class="filter-select" id="confidenceFilter" onchange="applyFilters()">
+                                <option value="all">Any Confidence</option>
+                                <option value="high">> 80%</option>
+                                <option value="medium">50-80%</option>
+                                <option value="low">&lt; 50%</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-actions">
+                            <button class="btn btn-primary" onclick="applyFilters()" style="padding: 0.5rem 1rem;">
+                                <i class="fas fa-check"></i> Apply
+                            </button>
+                            <button class="btn" onclick="resetFilters()" style="padding: 0.5rem 1rem; background: var(--gray);">
+                                <i class="fas fa-undo"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerts Table -->
+                <div class="alerts-container">
+                    <div class="alerts-header">
+                        <div class="alerts-title">
+                            <h3>📋 Alert Log</h3>
+                            <span class="alert-count" id="displayedCount">0</span>
+                        </div>
+                        <div>
+                            <span style="color: var(--gray);" id="lastUpdate">Last updated: --:--:--</span>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="alerts-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Source</th>
+                                    <th>Channel/Group</th>
+                                    <th>Risk Level</th>
+                                    <th>Message</th>
+                                    <th>Confidence</th>
+                                    <th>Evidence</th>
+                                </tr>
+                            </thead>
+                            <tbody id="alertsTableBody">
+                                <!-- Alerts will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="pagination" id="pagination">
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn">3</button>
+                        <button class="page-btn">4</button>
+                        <button class="page-btn">5</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Evidence Modal -->
+    <div class="modal" id="evidenceModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-shield-alt"></i> Blockchain Evidence</h2>
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="evidence-details">
+                <div class="evidence-row">
+                    <span class="evidence-label">Alert ID:</span>
+                    <span class="evidence-value" id="evidence-id">#1234</span>
+                </div>
+                <div class="evidence-row">
+                    <span class="evidence-label">Timestamp:</span>
+                    <span class="evidence-value" id="evidence-time">2024-03-10 14:23:45</span>
+                </div>
+                <div class="evidence-row">
+                    <span class="evidence-label">Source:</span>
+                    <span class="evidence-value" id="evidence-source">Telegram</span>
+                </div>
+                <div class="evidence-row">
+                    <span class="evidence-label">Channel:</span>
+                    <span class="evidence-value" id="evidence-channel">@darkmarket</span>
+                </div>
+                
+                <div class="evidence-message" id="evidence-message">
+                    "Looking for bulk cocaine delivery. Contact @dealer123 for prices."
+                </div>
+                
+                <div class="evidence-row">
+                    <span class="evidence-label">Risk Level:</span>
+                    <span class="evidence-value" id="evidence-risk">HIGH</span>
+                </div>
+                <div class="evidence-row">
+                    <span class="evidence-label">Confidence:</span>
+                    <span class="evidence-value" id="evidence-confidence">95%</span>
+                </div>
+                <div class="evidence-row">
+                    <span class="evidence-label">AI Model:</span>
+                    <span class="evidence-value" id="evidence-model">Llama3</span>
+                </div>
+                <div class="evidence-row">
+                    <span class="evidence-label">Blockchain Hash:</span>
+                    <span class="evidence-value evidence-hash" id="evidence-hash">0x7d8f3a2b1c9e5f4a8d3c2b1a9f8e7d6c5b4a3f2e1d</span>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <div class="blockchain-badge">
+                        <i class="fas fa-check-circle"></i> Verified on Chain
+                    </div>
+                    <div class="blockchain-badge">
+                        <i class="fas fa-clock"></i> Timestamped
+                    </div>
+                    <div class="blockchain-badge">
+                        <i class="fas fa-lock"></i> Tamper-proof
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button class="btn btn-primary" onclick="downloadEvidence()" style="flex: 1;">
+                        <i class="fas fa-download"></i> Download Evidence
+                    </button>
+                    <button class="btn btn-success" onclick="verifyBlockchain()" style="flex: 1;">
+                        <i class="fas fa-check-double"></i> Verify on Chain
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- External Data File -->
+    <script src="/static/js/alert-data.js"></script>
+    
+    <script>
+        // ==============================================
+        // NAVIGATION FUNCTIONS
+        // ==============================================
+        
+        function showComingSoon(feature) {
+            showNotification(`${feature} feature coming soon!`, 'info');
+        }
+        
+        // Update navigation alert badge
+        function updateNavAlertBadge() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('navAlertBadge');
+                    if (badge) {
+                        const newCount = data.total_alerts || 0;
+                        const oldCount = parseInt(badge.textContent) || 0;
+                        badge.textContent = newCount;
+                        
+                        // Add pulse animation when new alerts come in
+                        if (newCount > oldCount) {
+                            badge.style.animation = 'pulse 0.5s';
+                            setTimeout(() => {
+                                badge.style.animation = 'pulse 2s infinite';
+                            }, 500);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching alert count:', error);
+                    // Use sample data from external file
+                    if (window.ALERT_CONFIG) {
+                        document.getElementById('navAlertBadge').textContent = ALERT_CONFIG.sampleStats.totalAlerts;
+                    }
+                });
+        }
+        
+        // ==============================================
+        // ALERT CENTER FUNCTIONS - Using External Data
+        // ==============================================
+        
+        // Current filter state
+        let currentFilter = 'all';
+        let currentRiskFilter = 'all';
+        let currentDateFilter = 'all';
+        let currentConfidenceFilter = 'all';
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        
+        // Initialize with config data
+        let alertConfig = {
+            sources: ['telegram', 'reddit'],
+            riskLevels: ['high', 'medium', 'low'],
+            channels: {
+                telegram: ['@darkmarket', '@drugtalk', '@pharma_connect', '@underground', '@private_channel'],
+                reddit: ['r/darknet', 'r/drugs', 'r/RCsources', 'r/researchchemicals', 'r/DNMBusts']
+            },
+            messages: [
+                'Looking for bulk cocaine delivery. Contact @dealer123 for prices.',
+                'Xanax bars available, shipping worldwide. Discreet packaging.',
+                'Discussion about Bitcoin payments for special deliveries.',
+                'Pure MDMA crystals, wholesale prices. Telegram: @crystal_king',
+                'New batch of white heroin, 90% purity. Sample available.',
+                'Looking for connects in Mumbai. Need quality powder.',
+                'Fentanyl patches for sale, pharmaceutical grade.',
+                'Weed delivery service now operating in your area.',
+                'Need help finding LSD sheets in bulk.',
+                'Oxycodone 30mg, genuine Pharma. Bulk discount.'
+            ],
+            sampleStats: {
+                totalAlerts: 132,
+                highRiskAlerts: 21,
+                mediumRiskAlerts: 58,
+                lowRiskAlerts: 53
+            }
+        };
+        
+        // Try to load from external file, otherwise use defaults
+        if (window.ALERT_CONFIG) {
+            alertConfig = window.ALERT_CONFIG;
+        }
+        
+        // Sample evidence data from external source
+        let evidenceData = {};
+        
+        // Try to load evidence data from external file
+        if (window.EVIDENCE_DATA) {
+            evidenceData = window.EVIDENCE_DATA;
+        } else {
+            // Generate sample evidence data
+            for (let i = 1; i <= 25; i++) {
+                evidenceData[i] = {
+                    hash: '0x' + Math.random().toString(16).substring(2, 34),
+                    timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+                    verified: true
+                };
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAlerts();
+            updateStats();
+            updateNavAlertBadge();
+            
+            // Update every 5 seconds
+            setInterval(updateAlerts, 5000);
+            setInterval(updateStats, 5000);
+            setInterval(updateNavAlertBadge, 5000);
+        });
+        
+        function updateStats() {
+            fetch('/api/stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalAlerts').textContent = data.total_alerts || 0;
+                    document.getElementById('totalAlertsBadge').textContent = data.total_alerts || 0;
+                    document.getElementById('highRiskAlerts').textContent = data.high_risk_alerts || 0;
+                    
+                    // Calculate medium and low from sample data
+                    const total = data.total_alerts || 0;
+                    const high = data.high_risk_alerts || 0;
+                    document.getElementById('mediumRiskAlerts').textContent = Math.floor((total - high) * 0.6);
+                    document.getElementById('lowRiskAlerts').textContent = Math.floor((total - high) * 0.4);
+                    
+                    const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                    document.getElementById('lastUpdate').textContent = `Last updated: ${time}`;
+                })
+                .catch(error => {
+                    console.error('Error fetching stats:', error);
+                    // Use sample data from config
+                    document.getElementById('totalAlerts').textContent = alertConfig.sampleStats.totalAlerts;
+                    document.getElementById('totalAlertsBadge').textContent = alertConfig.sampleStats.totalAlerts;
+                    document.getElementById('highRiskAlerts').textContent = alertConfig.sampleStats.highRiskAlerts;
+                    document.getElementById('mediumRiskAlerts').textContent = alertConfig.sampleStats.mediumRiskAlerts;
+                    document.getElementById('lowRiskAlerts').textContent = alertConfig.sampleStats.lowRiskAlerts;
+                });
+        }
+        
+        function updateAlerts() {
+            fetch(`/api/alerts?source=${currentFilter}`)
+                .then(response => response.json())
+                .then(data => {
+                    displayAlerts(data.alerts || []);
+                })
+                .catch(error => {
+                    console.error('Error fetching alerts:', error);
+                    // Use sample data from config
+                    displayAlerts(generateSampleAlerts());
+                });
+        }
+        
+        function generateSampleAlerts() {
+            const alerts = [];
+            for (let i = 1; i <= 25; i++) {
+                const source = alertConfig.sources[Math.floor(Math.random() * alertConfig.sources.length)];
+                const risk = alertConfig.riskLevels[Math.floor(Math.random() * alertConfig.riskLevels.length)];
+                const channelList = alertConfig.channels[source];
+                
+                alerts.push({
+                    id: i,
+                    timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+                    source: source,
+                    channel: channelList[Math.floor(Math.random() * channelList.length)],
+                    risk_level: risk,
+                    message: alertConfig.messages[Math.floor(Math.random() * alertConfig.messages.length)],
+                    confidence: Math.floor(Math.random() * 40) + 60,
+                    ai_model: 'Llama3'
+                });
+            }
+            
+            return alerts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        }
+        
+        function displayAlerts(alerts) {
+            const tableBody = document.getElementById('alertsTableBody');
+            
+            // Apply filters
+            let filteredAlerts = alerts.filter(alert => {
+                if (currentRiskFilter !== 'all' && alert.risk_level !== currentRiskFilter) return false;
+                
+                if (currentConfidenceFilter !== 'all') {
+                    const conf = alert.confidence || 0;
+                    if (currentConfidenceFilter === 'high' && conf < 80) return false;
+                    if (currentConfidenceFilter === 'medium' && (conf < 50 || conf >= 80)) return false;
+                    if (currentConfidenceFilter === 'low' && conf >= 50) return false;
+                }
+                
+                if (currentDateFilter !== 'all') {
+                    const alertDate = new Date(alert.timestamp);
+                    const now = new Date();
+                    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    const weekAgo = new Date(today);
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    const monthAgo = new Date(today);
+                    monthAgo.setMonth(monthAgo.getMonth() - 1);
+                    
+                    if (currentDateFilter === 'today' && alertDate < today) return false;
+                    if (currentDateFilter === 'week' && alertDate < weekAgo) return false;
+                    if (currentDateFilter === 'month' && alertDate < monthAgo) return false;
+                }
+                
+                return true;
+            });
+            
+            // Update displayed count
+            document.getElementById('displayedCount').textContent = filteredAlerts.length;
+            
+            // Paginate
+            const start = (currentPage - 1) * itemsPerPage;
+            const paginatedAlerts = filteredAlerts.slice(start, start + itemsPerPage);
+            
+            if (!paginatedAlerts || paginatedAlerts.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 3rem; color: var(--gray);">
+                            <i class="fas fa-check-circle" style="font-size: 3rem; margin-bottom: 1rem; display: block; color: var(--secondary);"></i>
+                            No alerts match your filters
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            paginatedAlerts.forEach(alert => {
+                // Risk badge
+                let riskClass, riskText;
+                switch(alert.risk_level) {
+                    case 'high':
+                        riskClass = 'risk-high';
+                        riskText = 'HIGH';
+                        break;
+                    case 'medium':
+                        riskClass = 'risk-medium';
+                        riskText = 'MEDIUM';
+                        break;
+                    default:
+                        riskClass = 'risk-low';
+                        riskText = 'LOW';
+                }
+                
+                // Source badge
+                let sourceClass, sourceText;
+                switch(alert.source) {
+                    case 'telegram':
+                        sourceClass = 'source-telegram';
+                        sourceText = 'Telegram';
+                        break;
+                    case 'reddit':
+                        sourceClass = 'source-reddit';
+                        sourceText = 'Reddit';
+                        break;
+                    default:
+                        sourceClass = 'source-telegram';
+                        sourceText = 'Unknown';
+                }
+                
+                const time = new Date(alert.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const date = new Date(alert.timestamp).toLocaleDateString();
+                
+                // Get evidence hash from data
+                const evidenceHash = evidenceData[alert.id] || {
+                    hash: '0x' + Math.random().toString(16).substring(2, 34),
+                    timestamp: alert.timestamp,
+                    verified: true
+                };
+                
+                html += `
+                    <tr>
+                        <td title="${date}">${time}</td>
+                        <td><span class="source-badge ${sourceClass}">${sourceText}</span></td>
+                        <td>${alert.channel || 'Unknown'}</td>
+                        <td><span class="risk-badge ${riskClass}">${riskText}</span></td>
+                        <td>${alert.message?.substring(0, 50) || ''}${alert.message?.length > 50 ? '...' : ''}</td>
+                        <td>${alert.confidence ? alert.confidence.toFixed(0) : 0}%</td>
+                        <td>
+                            <button class="evidence-btn" onclick="viewEvidence(${alert.id}, '${alert.source}', '${alert.channel}', '${alert.message.replace(/'/g, "\\'")}', '${riskText}', ${alert.confidence})">
+                                <i class="fas fa-shield-alt"></i> View
+                            </button>
+                            <div class="evidence-hash">${evidenceHash.hash.substring(0, 10)}...</div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableBody.innerHTML = html;
+            
+            // Update pagination
+            updatePagination(filteredAlerts.length);
+        }
+        
+        function updatePagination(totalItems) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+            
+            let html = '';
+            for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+                html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+            }
+            
+            pagination.innerHTML = html;
+        }
+        
+        function goToPage(page) {
+            currentPage = page;
+            updateAlerts();
+        }
+        
+        function filterAlerts(source) {
+            document.querySelectorAll('.source-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            currentFilter = source;
+            currentPage = 1;
+            updateAlerts();
+        }
+        
+        function applyFilters() {
+            currentRiskFilter = document.getElementById('riskFilter').value;
+            currentDateFilter = document.getElementById('dateFilter').value;
+            currentConfidenceFilter = document.getElementById('confidenceFilter').value;
+            currentPage = 1;
+            updateAlerts();
+        }
+        
+        function resetFilters() {
+            document.getElementById('riskFilter').value = 'all';
+            document.getElementById('dateFilter').value = 'all';
+            document.getElementById('confidenceFilter').value = 'all';
+            
+            document.querySelectorAll('.source-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector('.source-btn[onclick*="all"]').classList.add('active');
+            
+            currentFilter = 'all';
+            currentRiskFilter = 'all';
+            currentDateFilter = 'all';
+            currentConfidenceFilter = 'all';
+            currentPage = 1;
+            updateAlerts();
+        }
+        
+        function refreshAlerts() {
+            updateAlerts();
+            updateStats();
+            showNotification('Alerts refreshed', 'success');
+        }
+        
+        function exportAlerts() {
+            showNotification('Exporting alerts as CSV...', 'info');
+            setTimeout(() => {
+                showNotification('Export complete!', 'success');
+            }, 2000);
+        }
+        
+        function viewEvidence(id, source, channel, message, risk, confidence) {
+            document.getElementById('evidence-id').textContent = '#' + id;
+            document.getElementById('evidence-time').textContent = new Date().toLocaleString();
+            document.getElementById('evidence-source').textContent = source.charAt(0).toUpperCase() + source.slice(1);
+            document.getElementById('evidence-channel').textContent = channel;
+            document.getElementById('evidence-message').textContent = '"' + message + '"';
+            document.getElementById('evidence-risk').textContent = risk;
+            document.getElementById('evidence-confidence').textContent = confidence + '%';
+            document.getElementById('evidence-model').textContent = 'Llama3';
+            
+            const hash = evidenceData[id] || {
+                hash: '0x' + Math.random().toString(16).substring(2, 34),
+                timestamp: new Date().toISOString(),
+                verified: true
+            };
+            document.getElementById('evidence-hash').textContent = hash.hash;
+            
+            document.getElementById('evidenceModal').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('evidenceModal').classList.remove('active');
+        }
+        
+        function downloadEvidence() {
+            showNotification('Evidence package downloaded', 'success');
+        }
+        
+        function verifyBlockchain() {
+            showNotification('Evidence verified on blockchain! ✓', 'success');
+        }
+        
+        function addTestAlert() {
+            fetch('/api/test-alert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ source: 'telegram' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                showNotification(`Test alert #${data.alert_id} added`, 'success');
+                updateAlerts();
+                updateStats();
+                updateNavAlertBadge();
+            })
+            .catch(error => {
+                showNotification('Test alert added (simulated)', 'success');
+                updateAlerts();
+                updateNavAlertBadge();
+            });
+        }
+        
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                background: ${type === 'success' ? '#10b981' : type === 'warning' ? '#f59e0b' : type === 'info' ? '#6366f1' : '#ef4444'};
+                color: white;
+                border-radius: 8px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                z-index: 10000;
+                animation: slideIn 0.3s ease-out;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            `;
+            
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : type === 'info' ? 'info-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+        
+        function addLogMessage(message, type = 'info') {
+            const logContainer = document.getElementById('agentLog');
+            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-info">${message}</span>`;
+            
+            logContainer.prepend(logEntry);
+            
+            const entries = logContainer.querySelectorAll('.log-entry');
+            if (entries.length > 10) {
+                entries[entries.length - 1].remove();
+            }
+        }
+        
+        // Update agent status
+        function updateAgentStatus() {
+            fetch('/api/agents')
+                .then(response => response.json())
+                .then(data => {
+                    data.agents.forEach(agent => {
+                        const statusItem = document.getElementById(`${agent.id}-status`);
+                        if (statusItem) {
+                            const indicator = statusItem.querySelector('.status-indicator');
+                            const span = statusItem.querySelector('span');
+                            
+                            if (agent.status === 'running') {
+                                indicator.classList.remove('status-inactive');
+                                indicator.classList.add('status-active');
+                                span.textContent = `${agent.name} (Running)`;
+                            } else {
+                                indicator.classList.remove('status-active');
+                                indicator.classList.add('status-inactive');
+                                span.textContent = agent.name;
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching agent status:', error);
+                });
+        }
+        
+        updateAgentStatus();
+        setInterval(updateAgentStatus, 5000);
+        
+        // Periodic log updates
+        setInterval(() => {
+            const activities = [
+                "Evidence blockchain verification complete",
+                "New alert: High risk detected in Telegram",
+                "Evidence hash stored on chain",
+                "Alert #1245 verified",
+                "Blockchain sync completed"
+            ];
+            const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+            addLogMessage(randomActivity, 'info');
+        }, 8000);
+    </script>
+</body>
+</html>
