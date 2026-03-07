@@ -2,20 +2,47 @@
 Nexus AI - Complete Monitoring System with Real Agent Logging
 Uses separate telegram_agent.py file
 """
-import os
 import sys
-import json
-import sqlite3
-import threading
-import subprocess
-import time
-import random
+import logging
+
+# Force immediate logging
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+print("🔴 STEP 1: app.py started loading")
+sys.stdout.flush()  # Force flush
+
+try:
+    print("🔴 STEP 2: Importing flask...")
+    from flask import Flask, render_template, jsonify, request
+    print("✅ STEP 2: Flask imported")
+except Exception as e:
+    print(f"❌ STEP 2 FAILED: {e}")
+    sys.exit(1)
+
+print("🔴 STEP 3: Importing other modules...")
+import os, json, sqlite3, threading, time, random
 from datetime import datetime
 from pathlib import Path
-from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
-import logging
 from dotenv import load_dotenv
+print("✅ STEP 3: Basic modules imported")
+
+print("🔴 STEP 4: Loading environment...")
+# Rest of your code...
+
+# import os
+# import sys
+# import json
+# import sqlite3
+# import threading
+# import subprocess
+# import time
+# import random
+# from datetime import datetime
+# from pathlib import Path
+# from flask import Flask, render_template, jsonify, request
+# from flask_cors import CORS
+# import logging
+# from dotenv import load_dotenv
 
 # ==============================================
 # LOAD ENVIRONMENT VARIABLES FIRST
