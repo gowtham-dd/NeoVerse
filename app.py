@@ -1986,7 +1986,80 @@ def search_slang():
 # ==============================================
 # Main Execution
 # ==============================================
+# if __name__ == '__main__':
+#     os.makedirs('templates', exist_ok=True)
+#     os.makedirs('static/css', exist_ok=True)
+    
+#     print("\n📋 System Status:")
+#     print("-" * 50)
+    
+#     try:
+#         stats = db_manager.get_stats()
+#         print(f"✅ Database: nexus_monitoring.db")
+#         print(f"📊 Total alerts: {stats['total_alerts']}")
+#         print(f"📈 High risk alerts: {stats['high_risk_alerts']}")
+#     except Exception as e:
+#         print(f"❌ Database error: {e}")
+    
+#     print("\n📁 Files Check:")
+#     print("-" * 50)
+    
+#     if os.path.exists('telegram_agent.py'):
+#         print("✅ telegram_agent.py exists")
+#     else:
+#         print("⚠️ telegram_agent.py will be created when needed")
+    
+#     cluster_file = Path('clusters.json')
+#     if cluster_file.exists():
+#         print(f"✅ clusters.json loaded with {len(CLUSTER_DATA)} clusters")
+#     else:
+#         print(f"⚠️ clusters.json not found - created empty file")
+    
+#     if os.path.exists('modules'):
+#         print("✅ modules/ directory exists")
+#         if os.path.exists('modules/telegram_client.py'):
+#             print("✅ modules/telegram_client.py exists")
+#         if os.path.exists('modules/ai_analyzer.py'):
+#             print("✅ modules/ai_analyzer.py exists")
+    
+#     if langsmith_client:
+#         print(f"✅ LangSmith: Enabled (Project: {LANGSMITH_PROJECT})")
+#         print(f"🔗 Dashboard: https://smith.langchain.com/projects/{LANGSMITH_PROJECT}")
+#     else:
+#         print("⚠️ LangSmith: Disabled (Set LANGSMITH_API_KEY in .env to enable)")
+    
+#     print("\n" + "="*60)
+#     print("🌐 Web Interface: http://localhost:5000")
+#     print("📊 Dashboard: http://localhost:5000/dashboard")
+#     print("🤖 Available Agents:")
+#     print("   • Telegram: ✅ REAL MONITORING (AI-powered)")
+#     print("   • Reddit: ⚠️ Simulation mode")
+#     print("📝 Logging: Console + Database + File + LangSmith")
+#     print("💾 Data Storage: SQLite (persistent)")
+#     print("📊 Cluster Data: clusters.json (modular)")
+#     print("="*60)
+
+#     print("\n✅ System ready for REAL Telegram monitoring!")
+#     print("📢 REAL AGENT ACTIVITY WILL BE DISPLAYED HERE:")
+#     print("-" * 60 + "\n")
+    
+#     try:
+#         app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
+#     except KeyboardInterrupt:
+#         print("\n👋 Shutting down all agents...")
+#         for agent_id in ['telegram', 'reddit']:
+#             agent_manager.stop_agent(agent_id)
+#         print("✅ System shutdown complete")
+
+# ==============================================
+# For local development only
+# ==============================================
 if __name__ == '__main__':
+    # This only runs when you execute python app.py directly
+    # Gunicorn ignores this block
+    print("\n⚠️ Running in development mode - use Gunicorn for production")
+    print("To run with Gunicorn: gunicorn app:app\n")
+    
     os.makedirs('templates', exist_ok=True)
     os.makedirs('static/css', exist_ok=True)
     
@@ -2043,10 +2116,5 @@ if __name__ == '__main__':
     print("📢 REAL AGENT ACTIVITY WILL BE DISPLAYED HERE:")
     print("-" * 60 + "\n")
     
-    try:
-        app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
-    except KeyboardInterrupt:
-        print("\n👋 Shutting down all agents...")
-        for agent_id in ['telegram', 'reddit']:
-            agent_manager.stop_agent(agent_id)
-        print("✅ System shutdown complete")
+    # Start Flask development server (for local testing only)
+    app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
