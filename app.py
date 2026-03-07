@@ -2,10 +2,6 @@
 Nexus AI - Complete Monitoring System with Real Agent Logging
 Uses separate telegram_agent.py file
 """
-"""
-Nexus AI - Complete Monitoring System with Real Agent Logging
-Uses separate telegram_agent.py file
-"""
 import os
 import sys
 import json
@@ -103,266 +99,25 @@ def trace_function(name=None):
     return decorator
 
 # ==============================================
-# Rest of your code continues here...
-# ==============================================
-# [Your existing DatabaseManager, AgentManager, Flask routes, etc.]
-def trace_function(name=None):
-    """Decorator to trace functions with LangSmith"""
-    def decorator(func):
-        if langsmith_client and LANGCHAIN_AVAILABLE:
-            return traceable(
-                name=name or func.__name__,
-                client=langsmith_client,
-                project_name=LANGSMITH_PROJECT
-            )(func)
-        return func
-    return decorator
-
-# ==============================================
 # Initial Setup
 # ==============================================
 if sys.platform == "win32":
     os.system("chcp 65001 > nul")
     sys.stdout.reconfigure(encoding='utf-8')
 
-def load_env_file():
-    """Load environment variables"""
-    env_path = Path('.env')
-    if not env_path.exists():
-        print("❌ .env file not found!")
-        return False
-    
-    try:
-        with open(env_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith('#'):
-                    if '=' in line:
-                        key, value = line.split('=', 1)
-                        os.environ[key.strip()] = value.strip().strip('"\'')
-        return True
-    except Exception as e:
-        print(f"❌ Error loading .env: {e}")
-        return False
-
 print("\n" + "="*60)
 print("🚀 NEXUS AI - Complete Monitoring System")
 print("="*60)
-
-if not load_env_file():
-    print("\n❌ Failed to load .env")
-    exit(1)
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 CORS(app)
 
 # ==============================================
-# Load Cluster Data from JSON
+# Load Cluster Data from JSON ONLY
 # ==============================================
 def load_cluster_data():
     """Load drug trafficking cluster data from JSON file"""
     cluster_file = Path('clusters.json')
-    
-    default_clusters = [
-        {
-            'id': 1,
-            'name': 'Cocaine Network',
-            'type': 'established',
-            'size': 45,
-            'confidence': 0.95,
-            'keywords': ['#white', '#snow', '#powder', '#coke', '#lines', '#blow', '#nose', '#ski', '#yayo'],
-            'messages': [
-                {'text': 'Need fresh white for weekend party', 'source': 'Telegram', 'timestamp': '2024-03-10 14:23'},
-                {'text': 'snow delivery available tonight', 'source': 'Telegram', 'timestamp': '2024-03-09 22:15'},
-                {'text': 'pure powder 5g ready', 'source': 'Reddit', 'timestamp': '2024-03-08 19:42'},
-                {'text': 'ski trip supplies in stock', 'source': 'Telegram', 'timestamp': '2024-03-07 11:30'}
-            ],
-            'first_detected': '2024-01-15',
-            'last_activity': '2024-03-10',
-            'source_distribution': {'Telegram': 28, 'Reddit': 10},
-            'common_phrases': ['white edition', 'pure snow', 'fresh powder', 'ski trip', 'yayo special'],
-            'risk_level': 'high',
-            'related_clusters': [2, 3]
-        },
-        {
-            'id': 2,
-            'name': 'Heroin Route',
-            'type': 'established',
-            'size': 38,
-            'confidence': 0.92,
-            'keywords': ['#horse', '#brown', '#smack', '#dope', '#china', '#H', '#boy', '#junk'],
-            'messages': [
-                {'text': 'horse tranquilizer available', 'source': 'Telegram', 'timestamp': '2024-03-09 20:10'},
-                {'text': 'brown sugar fresh batch', 'source': 'Reddit', 'timestamp': '2024-03-08 15:30'},
-                {'text': 'china white special delivery', 'source': 'Telegram', 'timestamp': '2024-03-07 09:45'},
-                {'text': 'smack city tonight', 'source': 'Reddit', 'timestamp': '2024-03-06 23:15'}
-            ],
-            'first_detected': '2024-01-20',
-            'last_activity': '2024-03-09',
-            'source_distribution': {'Telegram': 22, 'Reddit': 9},
-            'common_phrases': ['brown sugar', 'china white', 'horse medicine', 'smack city'],
-            'risk_level': 'high',
-            'related_clusters': [1, 8]
-        },
-        {
-            'id': 3,
-            'name': 'Meth Circle',
-            'type': 'established',
-            'size': 52,
-            'confidence': 0.94,
-            'keywords': ['#crystal', '#ice', '#glass', '#tina', '#crank', '#speed', '#shards', '#cook'],
-            'messages': [
-                {'text': 'crystal clear available', 'source': 'Telegram', 'timestamp': '2024-03-10 11:20'},
-                {'text': 'ice cold delivery', 'source': 'Reddit', 'timestamp': '2024-03-09 18:40'},
-                {'text': 'glass shards ready', 'source': 'Telegram', 'timestamp': '2024-03-08 22:10'},
-                {'text': 'tina needs new friends', 'source': 'Reddit', 'timestamp': '2024-03-07 14:30'}
-            ],
-            'first_detected': '2024-01-10',
-            'last_activity': '2024-03-10',
-            'source_distribution': {'Telegram': 32, 'Reddit': 12},
-            'common_phrases': ['crystal clear', 'ice cold', 'glass shards', 'tina friends'],
-            'risk_level': 'high',
-            'related_clusters': [5]
-        },
-        {
-            'id': 4,
-            'name': 'MDMA Empire',
-            'type': 'established',
-            'size': 41,
-            'confidence': 0.91,
-            'keywords': ['#molly', '#ecstasy', '#xtc', '#roll', '#mdma', '#beans', '#thizz', '#love'],
-            'messages': [
-                {'text': 'molly pure love available', 'source': 'Telegram', 'timestamp': '2024-03-09 21:30'},
-                {'text': 'ecstasy pills green apples', 'source': 'Reddit', 'timestamp': '2024-03-08 17:20'},
-                {'text': 'xtc rolling tonight', 'source': 'Telegram', 'timestamp': '2024-03-07 23:45'},
-                {'text': 'love drug special', 'source': 'Reddit', 'timestamp': '2024-03-06 19:10'}
-            ],
-            'first_detected': '2024-01-18',
-            'last_activity': '2024-03-09',
-            'source_distribution': {'Telegram': 25, 'Reddit': 10},
-            'common_phrases': ['pure love', 'green apples', 'rolling tonight', 'love drug'],
-            'risk_level': 'high',
-            'related_clusters': [7]
-        },
-        {
-            'id': 5,
-            'name': 'Ketamine Supply',
-            'type': 'emerging',
-            'size': 18,
-            'confidence': 0.78,
-            'keywords': ['#ketamine', '#specialK', '#vitaminK', '#ketty', '#horse', '#k'],
-            'messages': [
-                {'text': 'special K injection', 'source': 'Telegram', 'timestamp': '2024-03-08 13:15'},
-                {'text': 'vitamin K supplement', 'source': 'Reddit', 'timestamp': '2024-03-07 10:30'},
-                {'text': 'horse medicine available', 'source': 'Telegram', 'timestamp': '2024-03-06 16:45'},
-                {'text': 'k-hole special', 'source': 'Reddit', 'timestamp': '2024-03-05 22:20'}
-            ],
-            'first_detected': '2024-02-10',
-            'last_activity': '2024-03-08',
-            'source_distribution': {'Telegram': 10, 'Reddit': 5},
-            'common_phrases': ['special K', 'vitamin K', 'horse medicine', 'k-hole'],
-            'risk_level': 'medium',
-            'related_clusters': [3]
-        },
-        {
-            'id': 6,
-            'name': 'Fentanyl Ring',
-            'type': 'emerging',
-            'size': 15,
-            'confidence': 0.76,
-            'keywords': ['#fent', '#dance', '#china', '#apache', '#drop', '#fentanyl'],
-            'messages': [
-                {'text': 'dance fever going around', 'source': 'Telegram', 'timestamp': '2024-03-09 14:20'},
-                {'text': 'china girl special blend', 'source': 'Reddit', 'timestamp': '2024-03-08 11:35'},
-                {'text': 'apache warrior supplies', 'source': 'Telegram', 'timestamp': '2024-03-07 19:50'},
-                {'text': 'drop dead gorgeous', 'source': 'Reddit', 'timestamp': '2024-03-06 08:15'}
-            ],
-            'first_detected': '2024-02-15',
-            'last_activity': '2024-03-09',
-            'source_distribution': {'Telegram': 9, 'Reddit': 4},
-            'common_phrases': ['dance fever', 'china girl', 'apache warrior', 'drop dead'],
-            'risk_level': 'critical',
-            'related_clusters': [1, 2]
-        },
-        {
-            'id': 7,
-            'name': 'Xanax Empire',
-            'type': 'emerging',
-            'size': 22,
-            'confidence': 0.81,
-            'keywords': ['#xan', '#bars', '#benzos', '#schoolbus', '#sticks', '#xanax'],
-            'messages': [
-                {'text': 'school bus arriving', 'source': 'Telegram', 'timestamp': '2024-03-08 20:10'},
-                {'text': 'bars available 2mg', 'source': 'Reddit', 'timestamp': '2024-03-07 15:25'},
-                {'text': 'stick supply restocked', 'source': 'Telegram', 'timestamp': '2024-03-06 12:40'},
-                {'text': 'xan bars tonight', 'source': 'Reddit', 'timestamp': '2024-03-05 23:55'}
-            ],
-            'first_detected': '2024-02-12',
-            'last_activity': '2024-03-08',
-            'source_distribution': {'Telegram': 14, 'Reddit': 5},
-            'common_phrases': ['school bus', 'bars available', 'stick supply', 'xan bars'],
-            'risk_level': 'medium',
-            'related_clusters': [4]
-        },
-        {
-            'id': 8,
-            'name': 'Opioid Loop',
-            'type': 'new',
-            'size': 9,
-            'confidence': 0.65,
-            'keywords': ['#oxy', '#percs', '#vikes', '#pain', '#30s', '#blues'],
-            'messages': [
-                {'text': 'pain relief available', 'source': 'Telegram', 'timestamp': '2024-03-09 10:15'},
-                {'text': 'blue 30s in stock', 'source': 'Reddit', 'timestamp': '2024-03-08 14:30'},
-                {'text': 'perc special tonight', 'source': 'Telegram', 'timestamp': '2024-03-07 17:45'},
-                {'text': 'vikes for sale', 'source': 'Reddit', 'timestamp': '2024-03-06 21:20'}
-            ],
-            'first_detected': '2024-03-01',
-            'last_activity': '2024-03-09',
-            'source_distribution': {'Telegram': 5, 'Reddit': 2},
-            'common_phrases': ['pain relief', 'blue 30s', 'perc special', 'vikes sale'],
-            'risk_level': 'medium',
-            'related_clusters': [2]
-        },
-        {
-            'id': 9,
-            'name': 'GHB Network',
-            'type': 'new',
-            'size': 7,
-            'confidence': 0.62,
-            'keywords': ['#ghb', '#g', '#liquid', '#fantasy', '#blue'],
-            'messages': [
-                {'text': 'liquid fantasy available', 'source': 'Telegram', 'timestamp': '2024-03-08 22:10'},
-                {'text': 'blue magic potion', 'source': 'Reddit', 'timestamp': '2024-03-07 19:25'},
-                {'text': 'G special tonight', 'source': 'Telegram', 'timestamp': '2024-03-06 13:40'}
-            ],
-            'first_detected': '2024-03-03',
-            'last_activity': '2024-03-08',
-            'source_distribution': {'Telegram': 4, 'Reddit': 2},
-            'common_phrases': ['liquid fantasy', 'blue magic', 'G special'],
-            'risk_level': 'medium',
-            'related_clusters': []
-        },
-        {
-            'id': 10,
-            'name': 'Research Chemicals',
-            'type': 'new',
-            'size': 6,
-            'confidence': 0.58,
-            'keywords': ['#rc', '#research', '#chemicals', '#pellets', '#powders'],
-            'messages': [
-                {'text': 'research materials available', 'source': 'Telegram', 'timestamp': '2024-03-07 16:30'},
-                {'text': 'lab supplies fresh', 'source': 'Reddit', 'timestamp': '2024-03-06 11:45'},
-                {'text': 'chemical samples ready', 'source': 'Telegram', 'timestamp': '2024-03-05 20:15'}
-            ],
-            'first_detected': '2024-03-04',
-            'last_activity': '2024-03-07',
-            'source_distribution': {'Telegram': 3, 'Reddit': 2},
-            'common_phrases': ['research materials', 'lab supplies', 'chemical samples'],
-            'risk_level': 'low',
-            'related_clusters': []
-        }
-    ]
     
     try:
         if cluster_file.exists():
@@ -371,14 +126,14 @@ def load_cluster_data():
             print(f"✅ Loaded {len(clusters)} clusters from {cluster_file}")
             return clusters
         else:
+            # If file doesn't exist, create an empty array
             with open(cluster_file, 'w', encoding='utf-8') as f:
-                json.dump(default_clusters, f, indent=2)
-            print(f"✅ Created default {cluster_file} with {len(default_clusters)} clusters")
-            return default_clusters
+                json.dump([], f, indent=2)
+            print(f"✅ Created empty {cluster_file}")
+            return []
     except Exception as e:
         print(f"❌ Error loading cluster data: {e}")
-        print("⚠️ Using default cluster data")
-        return default_clusters
+        return []
 
 CLUSTER_DATA = load_cluster_data()
 
@@ -496,8 +251,6 @@ class DatabaseManager:
                     print("✅ Added source column to monitored_channels table")
                 except Exception as e:
                     print(f"⚠️ Could not add source to monitored_channels: {e}")
-        
-        # Add unique constraint if needed (can't add easily in SQLite, so we'll handle in code)
         
         # Initialize default agents
             default_agents = [
@@ -1353,9 +1106,26 @@ agent_manager = AgentManager(db_manager)
 @app.route('/')
 @trace_function(name="home_page")
 def index():
-    """Home page"""
-    return render_template('index.html')
-
+    """Home page with fallback"""
+    try:
+        return render_template('index.html')
+    except:
+        return """
+        <html>
+            <head><title>Nexus AI</title></head>
+            <body style="font-family: Arial; padding: 20px;">
+                <h1>🚀 Nexus AI Monitoring System</h1>
+                <p>✅ Server is running successfully!</p>
+                <ul>
+                    <li><a href="/dashboard">📊 Dashboard</a></li>
+                    <li><a href="/slang_galley">🌌 Slang Galaxy</a></li>
+                    <li><a href="/health">🔧 Health Check</a></li>
+                </ul>
+                <hr>
+                <pre>System Status: Online</pre>
+            </body>
+        </html>
+        """
 @app.route('/dashboard')
 @trace_function(name="dashboard_page")
 def dashboard():
@@ -2099,9 +1869,18 @@ def slang_galaxy():
 def get_slang_stats():
     """Get slang cluster statistics from JSON data"""
     
-    established = len([c for c in CLUSTER_DATA if c['type'] == 'established'])
-    emerging = len([c for c in CLUSTER_DATA if c['type'] == 'emerging'])
-    new = len([c for c in CLUSTER_DATA if c['type'] == 'new'])
+    # Handle empty clusters.json
+    if not CLUSTER_DATA:
+        return jsonify({
+            'established_clusters': 0,
+            'emerging_patterns': 0,
+            'new_detections': 0,
+            'clusters': []
+        })
+    
+    established = len([c for c in CLUSTER_DATA if c.get('type') == 'established'])
+    emerging = len([c for c in CLUSTER_DATA if c.get('type') == 'emerging'])
+    new = len([c for c in CLUSTER_DATA if c.get('type') == 'new'])
     
     return jsonify({
         'established_clusters': established,
@@ -2115,7 +1894,7 @@ def get_slang_stats():
 def get_slang_cluster(cluster_id):
     """Get detailed information about a specific cluster from JSON data"""
     
-    cluster = next((c for c in CLUSTER_DATA if c['id'] == cluster_id), None)
+    cluster = next((c for c in CLUSTER_DATA if c.get('id') == cluster_id), None)
     
     if cluster:
         return jsonify(cluster)
@@ -2129,14 +1908,14 @@ def confirm_slang(cluster_id):
     data = request.json
     cluster_name = data.get('name', f'Cluster {cluster_id}')
     
-    cluster = next((c for c in CLUSTER_DATA if c['id'] == cluster_id), None)
+    cluster = next((c for c in CLUSTER_DATA if c.get('id') == cluster_id), None)
     
     if cluster:
         db_manager.add_agent_log(
             'system', 
             'info', 
             f'✅ New slang cluster confirmed: {cluster_name}',
-            f'Cluster #{cluster_id} moved from {cluster["type"]} to established patterns'
+            f'Cluster #{cluster_id} moved from {cluster.get("type", "unknown")} to established patterns'
         )
     
     return jsonify({
@@ -2152,7 +1931,7 @@ def deny_slang(cluster_id):
     data = request.json
     cluster_name = data.get('name', f'Cluster {cluster_id}')
     
-    cluster = next((c for c in CLUSTER_DATA if c['id'] == cluster_id), None)
+    cluster = next((c for c in CLUSTER_DATA if c.get('id') == cluster_id), None)
     
     if cluster:
         db_manager.add_agent_log(
@@ -2192,9 +1971,9 @@ def search_slang():
         
         if matches:
             results.append({
-                'cluster_id': cluster['id'],
-                'name': cluster['name'],
-                'type': cluster['type'],
+                'cluster_id': cluster.get('id'),
+                'name': cluster.get('name'),
+                'type': cluster.get('type'),
                 'confidence': cluster.get('confidence', 0.5),
                 'matches': matches
             })
@@ -2230,7 +2009,11 @@ if __name__ == '__main__':
     else:
         print("⚠️ telegram_agent.py will be created when needed")
     
-    print(f"✅ clusters.json loaded with {len(CLUSTER_DATA)} clusters")
+    cluster_file = Path('clusters.json')
+    if cluster_file.exists():
+        print(f"✅ clusters.json loaded with {len(CLUSTER_DATA)} clusters")
+    else:
+        print(f"⚠️ clusters.json not found - created empty file")
     
     if os.path.exists('modules'):
         print("✅ modules/ directory exists")
