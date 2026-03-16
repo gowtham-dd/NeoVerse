@@ -58,4 +58,3 @@ Watch the full demo and walkthrough:
 
 ---
 
-## 🚀 Live Deployment
